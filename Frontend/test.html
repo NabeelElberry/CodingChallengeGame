@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SignalR Match Chat Test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+</head>
+<body>
+  <h2>SignalR Match Chat Room</h2>
+
+  <label>JWT Token:</label><br>
+  <input type="text" id="tokenInput" size="80" placeholder="Paste your JWT token here" /><br><br>
+
+  <label>Match ID:</label><br>
+  <input type="text" id="matchInput" placeholder="Enter match ID (e.g., match_123)" /><br><br>
+
+  <button onclick="connect()">Connect</button>
+  <button onclick="joinMatchRoom()">Join Match Room</button><br><br>
+
+  <textarea id="chatLog" rows="10" cols="80" readonly></textarea><br>
+  <input type="text" id="messageInput" placeholder="Enter message" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    let connection;
+
+    function connect() {
+      const token = document.getElementById("tokenInput").value;
+
+      connection = new signalR.HubConnectionBuilder()
+        .withUrl("https://localhost:5270/matchhub", {
+          accessTokenFactory: () => token
+        })
+        .configureLogging(signalR.LogLevel.Information)
+        .withAutomaticReconnect()
+        .build();
+
+      connection.on("ReceiveMessage", (userId, message) => {
+        log(`[${userId}]: ${message}`);
+      });
+
+      connection.on("UserJoined", (userId) => {
+        log(`🔔 User joined: ${userId}`);
+      });
+
+      connection.start()
+        .then(() => log("✅ Connected to SignalR"))
+        .catch(err => log("❌ Connection error: " + err));
+    }
+
+    function joinMatchRoom() {
+      const matchId = document.getElementById("matchInput").value;
+      connection.invoke("JoinMatchRoom", matchId)
+        .then(() => log(`🔗 Joined room: ${matchId}`))
+        .catch(err => log("❌ Join error: " + err));
+    }
+
+    function sendMessage() {
+      const matchId = document.getElementById("matchInput").value;
+      const message = document.getElementById("messageInput").value;
+      connection.invoke("SendMessageToMatch", matchId, message)
+        .catch(err => log("❌ Send error: " + err));
+    }
+
+    function log(msg) {
+      const logBox = document.getElementById("chatLog");
+      logBox.value += msg + "\n";
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@heroui/modal": "^2.2.18",
+    "@heroui/react": "^2.7.10",
+    "@microsoft/signalr": "^8.0.7",
+    "firebase-admin": "^13.4.0",
+    "framer-motion": "^12.17.0"
+  }
+}

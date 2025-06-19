@@ -1,0 +1,367 @@
+[
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.AdminController",
+    "Method": "PromoteUser",
+    "RelativePath": "admin/promote",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "CodingChallengeReal.DTO.PromoteRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "AddMatchAsync",
+    "RelativePath": "Match",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "addMatchRequest",
+        "Type": "CodingChallengeReal.DTO.AddMatchDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "GetMatchAsync",
+    "RelativePath": "Match",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "DeleteMatchAsync",
+    "RelativePath": "Match",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "UpdateMatchAsync",
+    "RelativePath": "Match",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "addMatchDTO",
+        "Type": "CodingChallengeReal.DTO.AddMatchDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "DebugClaims",
+    "RelativePath": "Match/debug-claims",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "Method": "AddQuestionAsync",
+    "RelativePath": "Question",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "addQuestionRequest",
+        "Type": "CodingChallengeReal.DTO.AddQuestionDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "Method": "GetQuestionAsync",
+    "RelativePath": "Question",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "Method": "DeleteQuestionAsync",
+    "RelativePath": "Question",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "Method": "UpdateQuestionAsync",
+    "RelativePath": "Question",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "addQuestionRequest",
+        "Type": "CodingChallengeReal.DTO.AddQuestionDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "Method": "AddBulkQuestionsFromJson",
+    "RelativePath": "Question/AddBulk",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.QueueController",
+    "Method": "EnqueueUser",
+    "RelativePath": "Queue",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "queuedUserDTO",
+        "Type": "CodingChallengeReal.DTO.AddQueuedUserDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "QueueUsersTogetherAsync",
+    "RelativePath": "queueUsers",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "mmr",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.SolutionController",
+    "Method": "AddQuestionAsync",
+    "RelativePath": "Solution",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "addSolutionRequest",
+        "Type": "CodingChallengeReal.DTO.AddSolutionDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.SolutionController",
+    "Method": "GetQuestionAsync",
+    "RelativePath": "Solution",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.SolutionController",
+    "Method": "DeleteQuestionAsync",
+    "RelativePath": "Solution",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.SolutionController",
+    "Method": "UpdateQuestionAsync",
+    "RelativePath": "Solution",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "addSolutionRequest",
+        "Type": "CodingChallengeReal.DTO.AddSolutionDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.UserController",
+    "Method": "AddUserAsync",
+    "RelativePath": "User",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "addUserRequest",
+        "Type": "CodingChallengeReal.DTO.AddUserDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.UserController",
+    "Method": "GetUserAsync",
+    "RelativePath": "User",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.UserController",
+    "Method": "DeleteUserAsync",
+    "RelativePath": "User",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.UserController",
+    "Method": "UpdateUserAsync",
+    "RelativePath": "User",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "updateUserRequest",
+        "Type": "CodingChallengeReal.DTO.AddUserDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Program\u002B\u003C\u003Ec",
+    "Method": "\u003C\u003CMain\u003E$\u003Eb__0_6",
+    "RelativePath": "ws",
+    "HttpMethod": "GET",
+    "IsController": false,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
+  }
+]
