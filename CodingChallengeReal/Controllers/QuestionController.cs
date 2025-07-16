@@ -63,19 +63,23 @@ namespace CodingChallengeReal.Controllers
             {
                 return Ok(false);
             }
-            originalQuestion.name = addQuestionRequest.name;
-            originalQuestion.description = addQuestionRequest.description;
-            originalQuestion.difficulty = addQuestionRequest.difficulty;
+            originalQuestion.Title = addQuestionRequest.name;
+            originalQuestion.Description = addQuestionRequest.description;
+            originalQuestion.Difficulty = addQuestionRequest.difficulty;
             var updatedUser = await _questionRepository.UpdateAsync(id, _mapper.Map<Question>(originalQuestion));
 
             return Ok(updatedUser);
         }
+
+        [Authorize(Policy = "AdminOnly")]
         [Route("AddBulk")]
         [HttpPost]
         public async Task<IActionResult> AddBulkQuestionsFromJson()
         {
             // todo
-            return null;
+            var result = await _questionRepository.AddQuestionsFromBulk();
+
+            return Ok(result);
         }
     }
 }

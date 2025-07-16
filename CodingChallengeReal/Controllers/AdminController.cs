@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Mvc;
             _adminService = adminService;
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize]
         [HttpPost("promote")]
         public async Task<IActionResult> PromoteUser([FromBody] PromoteRequest request)
         {

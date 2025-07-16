@@ -10,11 +10,23 @@ namespace CodingChallengeReal.DTO
         public string pk => $"q#{id}";
         [JsonPropertyName("sk")]
         public string sk { get; set; }
-        [JsonPropertyName("name")]
-        public string name { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
         [JsonPropertyName("description")]
-        public string description { get; set; }
+        public string Description { get; set; }
         [JsonPropertyName("difficulty")]
-        public int difficulty { get; set; }
+        public int Difficulty { get; set; }
+        [JsonPropertyName("sample_test_cases")]
+        public List<TestCaseDTO> SampleTestCases { get; set; }
+        [JsonPropertyName("hidden_test_cases")]
+        public List<TestCaseDTO> HiddenTestCases { get; set; }
+        [JsonPropertyName("boilerplate")]
+        public Dictionary<string, string> Boilerplate { get; set; }
+        [JsonPropertyName("method_name")]
+        public String MethodName { get; set; }
+        [JsonPropertyName("compare_func")]
+        public Dictionary<String, String> CompareFunc { get; set; }
+
+
     }
 }

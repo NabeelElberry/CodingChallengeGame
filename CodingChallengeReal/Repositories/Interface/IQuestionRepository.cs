@@ -10,5 +10,7 @@ namespace CodingChallengeReal.Repositories.Interface
         public Task<bool> DeleteAsync(Guid id);
         public Task<bool> UpdateAsync(Guid id, Question question);
 
+        public Task<bool> AddQuestionsFromBulk();
+
     }
 }

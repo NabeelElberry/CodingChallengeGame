@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Diagnostics;
+using System.Text.Json;
+using AutoMapper;
 using CodingChallengeReal.Domains;
 using CodingChallengeReal.DTO;
 using CodingChallengeReal.Misc;
@@ -8,7 +10,9 @@ using CodingChallengeReal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
+using static System.Net.WebRequestMethods;
 
 namespace CodingChallengeReal.Controllers
 {
@@ -21,16 +25,20 @@ namespace CodingChallengeReal.Controllers
         private readonly IHubContext<MatchHub> _matchHub;
         private readonly EnqueueService _enqueueService;
         private readonly IMatchRepository _matchRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
+        private readonly String Judge0URL = "http://107.23.165.87:2358";
+        private String pythonBoilerplate = "";
 
-        public MatchController(IMatchRepository matchRepository, IMapper mapper, IUserRepository userRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService)
+
+
+        public MatchController(IMatchRepository matchRepository, IMapper mapper, IQuestionRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService)
         {
             _matchService = matchService;
             _matchHub = matchHub;
             _enqueueService = enqueueService;
             _matchRepository = matchRepository;
-            _userRepository = userRepository;
+            _questionRepository = questionRepository;
             _mapper = mapper;
         }
 
@@ -161,6 +169,121 @@ namespace CodingChallengeReal.Controllers
 
             return Ok("Check console output.");
         }
+
+        [HttpPost("judge")]
+        public async Task<IActionResult> JudgeAnswer(JudgeQuestionDTO judgeQuestionDTO)
+        {
+            String endpoint = $"{Judge0URL}/submissions/?base64_encoded=false&wait=true";
+
+            QuestionDTO question = await _questionRepository.GetAsync(judgeQuestionDTO.QuestionId);
+            String fullCode;
+            Console.WriteLine($"{judgeQuestionDTO.LanguageId} {judgeQuestionDTO.UserCode} {judgeQuestionDTO.QuestionId}");
+            // python case
+            if (judgeQuestionDTO.LanguageId == 71)
+            {
+                fullCode = BuildFullPythonCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["python"]);
+            } else if (judgeQuestionDTO.LanguageId == 62) // java
+            {
+                fullCode = BuildFullJavaCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["java"]);
+            } else // CPP
+            {
+                fullCode = BuildFullCPPCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["cpp"]);
+            }
+
+            var payload =
+            new {
+                source_code = fullCode,
+                language_id = judgeQuestionDTO.LanguageId,
+                stdin = "",
+                expected_output = ""
+            };
+
+            Console.WriteLine("Payload: " + JsonSerializer.Serialize(payload));
+            var client = new HttpClient();
+            var content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+            var judge0Response = await client.PostAsync(endpoint, content);
+
+            var judge0Json = await judge0Response.Content.ReadAsStringAsync();
+            return Content(judge0Json, "application/json");
+        }
+
+
+        /* The structure here is 
+         * class Solution:
+         *     def methodName: 
+         *          {userCode}
+         *     assert statements
+         */
+        private static string BuildFullPythonCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
+        {
+            string typingImports = "from typing import List, Dict, Tuple, Set, Optional, Any, Union\n";
+            string fullCode = typingImports + userCode.Trim();
+
+            IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
+                    $@"result = Solution().{methodName}({tc.Input})
+            expected = {JsonSerializer.Serialize(tc.Output)}
+            assert {compareFunc}");
+
+                        fullCode += "\n\n" + string.Join("\n\n", FormatTestBlock(sampleTestCases));
+                        fullCode += "\n\n" + string.Join("\n\n", FormatTestBlock(hiddenTestCases));
+
+                        return fullCode;
+                    }
+
+                    private static string BuildFullCPPCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
+                    {
+                        IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
+                    $@"    {{
+                    auto result = sol.{methodName}({tc.Input});
+                    auto expected = {tc.Output};
+                    {compareFunc}
+                }}");
+
+                        string mainBlock = $@"
+            int main() {{
+                Solution sol;
+            {string.Join("\n", FormatTestBlock(sampleTestCases))}
+            {string.Join("\n", FormatTestBlock(hiddenTestCases))}
+                cout << ""All tests passed"" << endl;
+            }}";
+
+                        return $@"#include <cassert>
+            #include <string>
+            #include <vector>
+            #include <iostream>
+            #include <algorithm>
+            using namespace std;
+
+            {userCode.Trim()}
+
+            {mainBlock}";
+                    }
+
+                    private static string BuildFullJavaCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
+                    {
+                        IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
+                    $@"        {{
+                        var result = sol.{methodName}({tc.Input});
+                        var expected = {tc.Output};
+                        {compareFunc}
+                    }}");
+
+                        var mainBlock = $@"
+            public class Main {{
+                public static void main(String[] args) {{
+                    Solution sol = new Solution();
+            {string.Join("\n", FormatTestBlock(sampleTestCases))}
+            {string.Join("\n", FormatTestBlock(hiddenTestCases))}
+                    System.out.println(""All tests passed"");
+                }}
+            }}";
+
+                        return @"import java.util.*;
+            import java.util.Arrays;
+
+            " + userCode.Trim() + "\n\n" + mainBlock;
+                    }
+    }
     }
     
-}
+

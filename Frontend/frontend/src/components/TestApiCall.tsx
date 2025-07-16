@@ -31,6 +31,7 @@ export const TestApiCall = () => {
 
     const checkClaims = async () => {
         const tokenResullt = await auth.currentUser?.getIdTokenResult(true);
+        console.log(`Token: ${await auth.currentUser?.getIdToken()}`)
         console.log(tokenResullt?.claims.role);
     }
     
