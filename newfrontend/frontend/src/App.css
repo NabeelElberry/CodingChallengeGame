@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+@import "tailwindcss";
+#root, #html {
+  margin: 0 auto;
+  height:100vh;
+  background-color: #242424;
+  text-align: center;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+@theme {
+  --color-primary-DEFAULT: #4aa1f2;
+  --color-primary-light: #6cb6ff;
+  --color-primary-dark: #1e5e98;
+
+  --color-secondary-DEFAULT: #5f5bff;
+  --color-secondary-light: #8272ff;
+  --color-secondary-dark: #2620b3;
+
+  --color-button-text: #322f98;
+  --color-text-color: #6662FF;
+  --color-navbar-bg: #1f1f1f;
+  --font-pixel: 'Pixelify Sans', sans-serif;
+}
+

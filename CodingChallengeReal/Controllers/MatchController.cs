@@ -42,7 +42,7 @@ namespace CodingChallengeReal.Controllers
             _mapper = mapper;
         }
 
-    
+
         [HttpPost]
         public async Task<IActionResult> AddMatchAsync(AddMatchDTO addMatchRequest)
         {
@@ -98,7 +98,7 @@ namespace CodingChallengeReal.Controllers
             var max = min_max.Item2;
             var original = $"elo_queue_{min}_{max}";
             // find user in specific elo bracket, if none found expand out after 10 seconds
-           MatchResultDTO? result = null;
+            MatchResultDTO? result = null;
 
             // does 10 different brackets
             for (int r = 0; r < 10; r++)
@@ -142,9 +142,10 @@ namespace CodingChallengeReal.Controllers
                             await _matchHub.Clients.User(userId).SendAsync("MatchFound", match.id);
                             await _matchHub.Clients.User(result.Opponent.Value).SendAsync("MatchFound", match.id);
                             Console.WriteLine($"userId: {userId}, OPPONENT VAL: {result.Opponent.Value}, OPPONENT: {result.Opponent}");
-                            
+
                             return Ok(matchDto);
-                        } else
+                        }
+                        else
                         {
                             return Ok(true);
                         }
@@ -182,16 +183,22 @@ namespace CodingChallengeReal.Controllers
             if (judgeQuestionDTO.LanguageId == 71)
             {
                 fullCode = BuildFullPythonCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["python"]);
-            } else if (judgeQuestionDTO.LanguageId == 62) // java
+                Console.WriteLine($"fullCode:\n{fullCode}");
+            }
+            else if (judgeQuestionDTO.LanguageId == 62) // java
             {
                 fullCode = BuildFullJavaCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["java"]);
-            } else // CPP
+                Console.WriteLine($"fullCode:\n{fullCode}");
+            }
+            else // CPP
             {
                 fullCode = BuildFullCPPCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["cpp"]);
+                Console.WriteLine($"fullCode:\n{fullCode}");
             }
 
             var payload =
-            new {
+            new
+            {
                 source_code = fullCode,
                 language_id = judgeQuestionDTO.LanguageId,
                 stdin = "",
@@ -220,70 +227,119 @@ namespace CodingChallengeReal.Controllers
             string fullCode = typingImports + userCode.Trim();
 
             IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
-                    $@"result = Solution().{methodName}({tc.Input})
-            expected = {JsonSerializer.Serialize(tc.Output)}
-            assert {compareFunc}");
+                    $"result = Solution().{methodName}({tc.Input})\nexpected = {JsonSerializer.Serialize(tc.Output)}\nassert {compareFunc}\nprint('Input:', {tc.Input})\nprint('Result:', result)\nprint('Expected:', expected)\nprint('Expected type: ', type(expected))\nprint('result type: ', type(result))\nprint('sorted result', sorted(result))\nprint('sorted eval expected: ', sorted(eval(expected)))\nprint('type sorted result', type(sorted(result)))\nprint('type sorted eval expected: ', type(sorted(eval(expected))))\n");
 
-                        fullCode += "\n\n" + string.Join("\n\n", FormatTestBlock(sampleTestCases));
-                        fullCode += "\n\n" + string.Join("\n\n", FormatTestBlock(hiddenTestCases));
+            fullCode += "\n\n" + string.Join("\n\n", FormatTestBlock(sampleTestCases));
+            fullCode += "\n\n" + string.Join("\n\n", FormatTestBlock(hiddenTestCases));
+            fullCode += "print(\"ALL TESTS PASSED\")";
 
-                        return fullCode;
-                    }
+            return fullCode;
+        }
 
-                    private static string BuildFullCPPCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
-                    {
-                        IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
-                    $@"    {{
-                    auto result = sol.{methodName}({tc.Input});
-                    auto expected = {tc.Output};
-                    {compareFunc}
-                }}");
+        private static string BuildFullCPPCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
+        {
+            IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
+        $@"    {{
+        auto result = sol.{methodName}({tc.Input});
+        auto expected = {tc.Output};
+        bool passed = [&]() {{
+{WrapCompareFunc(compareFunc, "cpp", "            ")}
+            return passed;
+        }}();
 
-                        string mainBlock = $@"
-            int main() {{
-                Solution sol;
-            {string.Join("\n", FormatTestBlock(sampleTestCases))}
-            {string.Join("\n", FormatTestBlock(hiddenTestCases))}
-                cout << ""All tests passed"" << endl;
-            }}";
+        if (!passed) {{
+            cout << ""FAILED TEST"" << endl;
+            cout << ""Input: {tc.Input}"" << endl;
+            cout << ""(Add more detailed result/expected prints in compare_func if needed)"" << endl;
+            exit(1);
+        }}
+    }}");
 
-                        return $@"#include <cassert>
-            #include <string>
-            #include <vector>
-            #include <iostream>
-            #include <algorithm>
-            using namespace std;
+            string mainBlock = $@"
+int main() {{
+    Solution sol;
+{string.Join("\n", FormatTestBlock(sampleTestCases))}
+{string.Join("\n", FormatTestBlock(hiddenTestCases))}
+    cout << ""All tests passed"" << endl;
+}}";
 
-            {userCode.Trim()}
+            return $@"#include <cassert>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
 
-            {mainBlock}";
-                    }
+{userCode.Trim()}
 
-                    private static string BuildFullJavaCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
-                    {
-                        IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
-                    $@"        {{
-                        var result = sol.{methodName}({tc.Input});
-                        var expected = {tc.Output};
-                        {compareFunc}
-                    }}");
+{mainBlock}";
+        }
 
-                        var mainBlock = $@"
-            public class Main {{
-                public static void main(String[] args) {{
-                    Solution sol = new Solution();
-            {string.Join("\n", FormatTestBlock(sampleTestCases))}
-            {string.Join("\n", FormatTestBlock(hiddenTestCases))}
-                    System.out.println(""All tests passed"");
-                }}
-            }}";
 
-                        return @"import java.util.*;
-            import java.util.Arrays;
+        private static string BuildFullJavaCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
+        {
+            IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
+        $@"        {{
+            var result = sol.{methodName}({tc.Input});
+            var expected = {tc.Output};
+            boolean passed = false;
+            try {{
+{WrapCompareFunc(compareFunc, "java", "                ")}
+            }} catch (Exception e) {{
+                System.out.println(""Exception during comparison: "" + e);
+            }}
 
-            " + userCode.Trim() + "\n\n" + mainBlock;
-                    }
+            if (!passed) {{
+                System.out.println(""FAILED TEST"");
+                System.out.println(""Input: {tc.Input}"");
+                System.out.println(""Expected: "" + Arrays.toString(expected));
+                System.out.println(""Got: "" + Arrays.toString(result));
+                System.exit(1);
+            }}
+        }}");
+
+            var mainBlock = $@"
+public class Main {{
+    public static void main(String[] args) {{
+        Solution sol = new Solution();
+{string.Join("\n", FormatTestBlock(sampleTestCases))}
+{string.Join("\n", FormatTestBlock(hiddenTestCases))}
+        System.out.println(""All tests passed"");
+    }}
+}}";
+
+            return @"import java.util.*;
+import java.util.Arrays;
+
+" + userCode.Trim() + "\n\n" + mainBlock;
+        }
+
+
+        private static string WrapCompareFunc(string compareFunc, string language, string indent = "    ")
+        {
+            var lines = compareFunc.Trim().Split('\n').Select(l => l.Trim()).ToList();
+
+            if (lines.Count == 1 && lines[0].StartsWith("return "))
+            {
+                string expr = lines[0].Substring("return ".Length).TrimEnd(';');
+                return $"{indent}passed = {expr};";
+            }
+
+            // Multi-line case — replace first return line
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (lines[i].StartsWith("return "))
+                {
+                    string expr = lines[i].Substring("return ".Length).TrimEnd(';');
+                    lines[i] = $"passed = {expr};";
+                    break;
+                }
+            }
+
+            return string.Join("\n", lines.Select(line => indent + line));
+        }
     }
     }
-    
+
+
 

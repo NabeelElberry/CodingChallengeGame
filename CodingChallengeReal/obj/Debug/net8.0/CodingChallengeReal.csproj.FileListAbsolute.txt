@@ -56,7 +56,6 @@ C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\ne
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Misc\leetcode_all_vague_rewritten_draft.json
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\questions.json
-C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\firebase-admin.json
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\FirebaseAdmin.dll
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Google.Api.Gax.dll
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Google.Api.Gax.Rest.dll
@@ -67,3 +66,4 @@ C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\obj\Debug\ne
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\questions_inputs_comma_fixed.json
+C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\questions_compare_func_cleaned.json

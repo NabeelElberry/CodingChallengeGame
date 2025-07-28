@@ -56,8 +56,8 @@ export default function IndexPage() {
       {method: "POST",
         body: JSON.stringify({
           "userCode": editorRef.current.getValue(),
-          "languageId": 54,
-          "questionId": "801a90d1-0a16-4781-8df3-c3942f432cab" // two sum
+          "languageId": 62,
+          "questionId": "2fa85fbc-75a9-42fc-8039-e815643438bb" // two sum
         }),
         headers: {
           "Content-Type": "application/json",

@@ -93,7 +93,7 @@ namespace CodingChallengeReal.Repositories.Implementation
 
         public async Task<bool> AddQuestionsFromBulk()
         {
-            var jsonString = File.ReadAllText("questions_inputs_comma_fixed.json");
+            var jsonString = File.ReadAllText("questions_compare_func_cleaned.json");
 
             // Deserialize array of questions
             var documents = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(jsonString);
