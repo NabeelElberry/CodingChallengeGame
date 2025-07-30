@@ -7,7 +7,7 @@ import { Image } from "@mantine/core"
 import CustomButton from "../../components/Button"
 export const HeroPage = () => {
     return ( 
-    <div className="h-full w-full">
+    <div className="flex flex-col h-screen w-full">
         <HeroHeader />
         <HeroBody />
 
@@ -16,21 +16,28 @@ export const HeroPage = () => {
 }
 
 const HeroBody = () => {
-    return (<div className="flex flex-col mt-5">
-        <div className="flex flex-col mb-5">
-            <div className="font-extrabold text-7xl text-text-color">GET BETTER AT CODING<p className="text-9xl text-white">WHILE PLAYING</p></div>
-            <p className="text-[#ACB4E2] tracking-[0.5em]">LEARN ALGORITHMS AND DATA STRUCTURES THROUGH FAST-PACED CODING MINI-GAMES</p>
+    return (
+        
+        // Changed h-screen to flex-grow to make it take up remaining vertical space
+        // Added pt-5 for top padding instead of mt-5 for the entire div
+        <div className="flex flex-col pt-2 grow ">
+            <div className="flex flex-col">
+                <div className="font-extrabold text-3xl lg:text-7xl text-text-color pb-2">GET BETTER AT CODING<p className="text-5xl lg:text-9xl text-white">WHILE PLAYING</p></div>
+                <p className="text-[#ACB4E2] text-sm md:text-lg tracking-[0.5em]">LEARN ALGORITHMS AND DATA STRUCTURES THROUGH FAST-PACED CODING MINI-GAMES</p>
+            </div>
+            <Marquee className="pt-10 overflow-hidden">
+                <Image src={celeste} className="h-60 3xl:h-100"/>
+                <div className="w-10"></div>
+                <Image src={ff6} className="h-60 3xl:h-100"/>
+                <div className="w-10"></div>
+                <Image src={ff4} className="h-60 3xl:h-100" />
+                <div className="w-10"></div>
+            </Marquee>
+            {/* This div correctly centers the button within its available space */}
+            <div className="flex items-center justify-center grow">
+                <CustomButton className={"w-80 h-50 md:w-200 "} size={"text-2xl md:text-8xl 3xl:text-9xl"} pulse={true}>START</CustomButton>
+            </div>
         </div>
-        <Marquee className="overflow-hidden mb-5">
-            <Image src={celeste} h={300}/>
-            <div className="w-10"></div>
-            <Image src={ff6}  h={300}/>
-            <div className="w-10"></div>
-            <Image src={ff4}  h={300} />
-            <div className="w-10"></div>
-        </Marquee>
-        <div>
-            <CustomButton width={96} height={96} size={"2xl"} spacing={"tracking-widest"}>START</CustomButton>
-        </div>
-    </div>)
+    )
 }
+// width={800} height={300} size={"9xl"} spacing={"tracking-widest"}

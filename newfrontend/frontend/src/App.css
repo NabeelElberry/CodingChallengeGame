@@ -21,5 +21,7 @@
   --color-text-color: #6662FF;
   --color-navbar-bg: #1f1f1f;
   --font-pixel: 'Pixelify Sans', sans-serif;
+
+  --breakpoint-3xl: 140rem;
 }
 
