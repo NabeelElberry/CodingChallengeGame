@@ -3,16 +3,17 @@ import * as motion from "motion/react-client";
 interface CustomButtonProps {
   children: React.ReactNode;
   width?: string | number; // e.g. "150px", "10rem", or 200
-  size?: string | number;
+  tailwindTextSize?: string | number;
   spacing?: string | number;
   height?: string | number;
   className?: string | number;
   pulse?: boolean;
+  onClick?: () => void;
 }
 
-function CustomButton({ children, width, size, spacing, height, className, pulse }: CustomButtonProps) {
+function CustomButton({ children, tailwindTextSize, spacing, className, pulse, onClick}: CustomButtonProps) {
   return (
-    <button
+    <button onClick={onClick}
       className={`p-2 
         bg-text-color text-button-text rounded-2xl 
         duration-500 flex items-center justify-center text-center
@@ -20,12 +21,10 @@ function CustomButton({ children, width, size, spacing, height, className, pulse
         ${!pulse ? "hover:text-white": ""}
         ${className ?? ''}
         `}
-        
-    
     >
       {pulse 
       ? 
-      <motion.div className={`w-full ${size ? size : "text-sm"} ${spacing ?? ""}`} 
+      <motion.div className={`w-full ${tailwindTextSize ? tailwindTextSize : "text-sm"} ${spacing ?? ""}`} 
       animate={{ color: ['#ffffff', '#322f98', '#ffffff'] }}
       transition={{
         duration: 3,
@@ -36,7 +35,7 @@ function CustomButton({ children, width, size, spacing, height, className, pulse
 
       > {children}</motion.div>
       : 
-      <span className={`w-full ${size ? size : "text-sm"} ${spacing ?? ""}`}>{children}</span>}
+      <span className={`w-full ${tailwindTextSize ? tailwindTextSize : "text-sm"} ${spacing ?? ""}`}>{children}</span>}
       
     </button>
   );

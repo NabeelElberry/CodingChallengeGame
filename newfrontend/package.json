@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "jwt-decode": "^4.0.0",
     "motion": "^12.23.11"
+  },
+  "devDependencies": {
+    "react-router-dom": "^7.7.1"
   }
 }

@@ -25,6 +25,6 @@ using Microsoft.AspNetCore.Mvc;
             return Ok("UID {uid} admin");
         }
 
-
+        
     }
 }

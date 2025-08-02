@@ -16,6 +16,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "CodingChallengeReal.Controllers.AuthenticationController",
+    "Method": "GetAuthenticationStatus",
+    "RelativePath": "auth",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "CodingChallengeReal.Controllers.MatchController",
     "Method": "AddMatchAsync",
     "RelativePath": "Match",

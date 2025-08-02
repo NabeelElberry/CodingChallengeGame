@@ -36,6 +36,18 @@
         }
       }
     },
+    "/auth": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/ws": {
       "get": {
         "tags": [
