@@ -35,6 +35,7 @@ builder.Services.AddSingleton<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient(Ama
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
 builder.Services.AddScoped<EnqueueService>();
+builder.Services.AddScoped<Matchmaker>();
 builder.Logging.AddConsole();
 var corsPolicy = "AllowLocalhostFrontend";
 

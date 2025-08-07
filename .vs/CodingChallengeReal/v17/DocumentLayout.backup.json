@@ -3,8 +3,28 @@
   "WorkspaceRootPath": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\services\\matchmaker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\services\\matchmaker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\controllers\\matchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\controllers\\matchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\dto\\leetcodequestion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\leetcodequestion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\dto\\matchresultdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\matchresultdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\dto\\matchdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\matchdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\controllers\\authenticationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -21,10 +41,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\services\\firebaseadminservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\services\\firebaseadminservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\controllers\\matchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\controllers\\matchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\repositories\\implementation\\questionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -55,14 +71,6 @@
       "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\testcasedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\dto\\matchresultdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\matchresultdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\dto\\matchdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\matchdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\dto\\addqueueduserdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\addqueueduserdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -77,10 +85,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\dto\\promoterequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\promoterequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\dto\\leetcodequestion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|solutionrelative:codingchallengereal\\dto\\leetcodequestion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EC7902D6-1574-4AC5-A57A-7CC481185D66}|CodingChallengeReal\\CodingChallengeReal.csproj|c:\\users\\nabee\\source\\repos\\codingchallengereal\\codingchallengereal\\misc\\matchhub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -101,24 +105,38 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 369,
-          "SelectedChildIndex": 4,
+          "DockedWidth": 584,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 0,
+              "Title": "Matchmaker.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Services\\Matchmaker.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\Services\\Matchmaker.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Services\\Matchmaker.cs",
+              "RelativeToolTip": "CodingChallengeReal\\Services\\Matchmaker.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAgwB8AAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-04T20:55:51.601Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "MatchController.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\MatchController.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Controllers\\MatchController.cs",
               "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\MatchController.cs",
               "RelativeToolTip": "CodingChallengeReal\\Controllers\\MatchController.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAQwMoAAAA6AAAAAAAAAA==",
+              "ViewState": "AgIAAGUAAAAAAAAAAAAYwHwAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-17T15:04:13.73Z"
+              "WhenOpened": "2025-06-17T15:04:13.73Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 3,
               "Title": "LeetcodeQuestion.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\LeetcodeQuestion.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\LeetcodeQuestion.cs",
@@ -126,11 +144,12 @@
               "RelativeToolTip": "CodingChallengeReal\\DTO\\LeetcodeQuestion.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-23T20:53:15.427Z"
+              "WhenOpened": "2025-06-23T20:53:15.427Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 7,
               "Title": "QuestionController.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\QuestionController.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Controllers\\QuestionController.cs",
@@ -142,7 +161,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "QuestionRepository.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Repositories\\Implementation\\QuestionRepository.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Repositories\\Implementation\\QuestionRepository.cs",
@@ -154,20 +173,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Program.cs",
-              "RelativeDocumentMoniker": "CodingChallengeReal\\Program.cs",
-              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Program.cs",
-              "RelativeToolTip": "CodingChallengeReal\\Program.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAcwCMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-16T17:33:21.883Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 11,
               "Title": "IQuestionRepository.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Repositories\\Interface\\IQuestionRepository.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Repositories\\Interface\\IQuestionRepository.cs",
@@ -179,7 +185,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 12,
               "Title": "IMatchService.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Services\\IMatchService.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Services\\IMatchService.cs",
@@ -191,7 +197,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 9,
               "Title": "FirebaseAdminService.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Services\\FirebaseAdminService.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Services\\FirebaseAdminService.cs",
@@ -203,7 +209,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 14,
               "Title": "MatchService.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Services\\MatchService.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Services\\MatchService.cs",
@@ -215,7 +221,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 23,
               "Title": "IMatchRepository.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Repositories\\Interface\\IMatchRepository.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Repositories\\Interface\\IMatchRepository.cs",
@@ -227,7 +233,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "MatchHub.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Misc\\MatchHub.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Misc\\MatchHub.cs",
@@ -240,109 +246,38 @@
           ]
         },
         {
-          "DockedWidth": 227,
+          "DockedWidth": 12,
           "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "AuthenticationController.cs",
-              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\AuthenticationController.cs",
-              "RelativeDocumentMoniker": "CodingChallengeReal\\Controllers\\AuthenticationController.cs",
-              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\AuthenticationController.cs",
-              "RelativeToolTip": "CodingChallengeReal\\Controllers\\AuthenticationController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Program.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\Program.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Program.cs",
+              "RelativeToolTip": "CodingChallengeReal\\Program.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAAAcwCUAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-01T22:39:22.081Z",
+              "WhenOpened": "2025-06-16T17:33:21.883Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "JudgeQuestionDTO.cs",
-              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\JudgeQuestionDTO.cs",
-              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\JudgeQuestionDTO.cs",
-              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\JudgeQuestionDTO.cs",
-              "RelativeToolTip": "CodingChallengeReal\\DTO\\JudgeQuestionDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-14T18:14:28.621Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "QuestionDTO.cs",
-              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\QuestionDTO.cs",
-              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\QuestionDTO.cs",
-              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\QuestionDTO.cs",
-              "RelativeToolTip": "CodingChallengeReal\\DTO\\QuestionDTO.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAQwCAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-15T15:44:17.058Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "CodingChallengeReal\\Controllers\\AdminController.cs",
-              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "CodingChallengeReal\\Controllers\\AdminController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-26T17:42:43.339Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "TestCaseDTO.cs",
-              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\TestCaseDTO.cs",
-              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\TestCaseDTO.cs",
-              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\TestCaseDTO.cs",
-              "RelativeToolTip": "CodingChallengeReal\\DTO\\TestCaseDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAcAAAAWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-14T20:26:46.332Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 4,
               "Title": "MatchResultDTO.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\MatchResultDTO.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\MatchResultDTO.cs",
               "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\MatchResultDTO.cs",
               "RelativeToolTip": "CodingChallengeReal\\DTO\\MatchResultDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAABJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-15T16:18:56.675Z"
+              "WhenOpened": "2025-07-15T16:18:56.675Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "QueuedUserDTO.cs",
-              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\QueuedUserDTO.cs",
-              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\QueuedUserDTO.cs",
-              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\QueuedUserDTO.cs",
-              "RelativeToolTip": "CodingChallengeReal\\DTO\\QueuedUserDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-15T16:18:58.113Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "SolutionDTO.cs",
-              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\SolutionDTO.cs",
-              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\SolutionDTO.cs",
-              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\SolutionDTO.cs",
-              "RelativeToolTip": "CodingChallengeReal\\DTO\\SolutionDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-15T16:18:58.828Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 5,
               "Title": "MatchDTO.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\MatchDTO.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\MatchDTO.cs",
@@ -354,7 +289,91 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AuthenticationController.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\AuthenticationController.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\Controllers\\AuthenticationController.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\AuthenticationController.cs",
+              "RelativeToolTip": "CodingChallengeReal\\Controllers\\AuthenticationController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T22:39:22.081Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 15,
+              "Title": "JudgeQuestionDTO.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\JudgeQuestionDTO.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\JudgeQuestionDTO.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\JudgeQuestionDTO.cs",
+              "RelativeToolTip": "CodingChallengeReal\\DTO\\JudgeQuestionDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-14T18:14:28.621Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "QuestionDTO.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\QuestionDTO.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\QuestionDTO.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\QuestionDTO.cs",
+              "RelativeToolTip": "CodingChallengeReal\\DTO\\QuestionDTO.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAQwCAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-15T15:44:17.058Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\Controllers\\AdminController.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "CodingChallengeReal\\Controllers\\AdminController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-26T17:42:43.339Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "TestCaseDTO.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\TestCaseDTO.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\TestCaseDTO.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\TestCaseDTO.cs",
+              "RelativeToolTip": "CodingChallengeReal\\DTO\\TestCaseDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAcAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-14T20:26:46.332Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "QueuedUserDTO.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\QueuedUserDTO.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\QueuedUserDTO.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\QueuedUserDTO.cs",
+              "RelativeToolTip": "CodingChallengeReal\\DTO\\QueuedUserDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-15T16:18:58.113Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "SolutionDTO.cs",
+              "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\SolutionDTO.cs",
+              "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\SolutionDTO.cs",
+              "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\SolutionDTO.cs",
+              "RelativeToolTip": "CodingChallengeReal\\DTO\\SolutionDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-15T16:18:58.828Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
               "Title": "AddQueuedUserDTO.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\AddQueuedUserDTO.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\AddQueuedUserDTO.cs",
@@ -366,7 +385,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "PromoteRequest.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\DTO\\PromoteRequest.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\DTO\\PromoteRequest.cs",
@@ -378,7 +397,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 22,
               "Title": "MatchRepository.cs",
               "DocumentMoniker": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Repositories\\Implementation\\MatchRepository.cs",
               "RelativeDocumentMoniker": "CodingChallengeReal\\Repositories\\Implementation\\MatchRepository.cs",

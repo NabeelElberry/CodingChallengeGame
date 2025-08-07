@@ -28,10 +28,10 @@ namespace CodingChallengeReal.Services
             bool matchFound = false;
             var key = $"elo_queue_{minBucket}_{maxBucket}";
             var matchedSetKey = "matched_players_set";
-            var matchHashKey = "match_pairs";
+            var matchHashKey = "match_pairs"; // stores all current matches, with the pairs of players
             var startTime = DateTime.UtcNow;
 
-            if (await _redis.SetContainsAsync(matchedSetKey, playerId))
+            if (await _redis.SetContainsAsync(matchedSetKey, playerId)) // player already in match, do nothing
             {
                 await _redis.ListRemoveAsync(key, playerId);
                 return null;
@@ -44,7 +44,7 @@ namespace CodingChallengeReal.Services
                 var opponent = await _redis.ListRightPopAsync(key); // opponent popped
                 var player = (RedisValue)playerId;
 
-                if (opponent.HasValue)
+                if (opponent.HasValue) // anyone in the queue
                 {
 
                     // Check if opponent is already matched
@@ -54,12 +54,35 @@ namespace CodingChallengeReal.Services
                         // players are currently engaged in match
                         await _redis.SetAddAsync(matchedSetKey, playerId);
                         await _redis.SetAddAsync(matchedSetKey, opponent);
-                        Console.WriteLine($"Opponent in Enqueue Service: {opponent} 1"); 
+                        Console.WriteLine($"Opponent in Enqueue Service: {opponent}"); 
 
                         HashEntry[] hashEntryArr = { new HashEntry(playerId, opponent), new HashEntry(opponent, playerId) };
+
+                        Console.WriteLine($"hash entry arr: {string.Join(", ", hashEntryArr.Select(h => $"{h.Name}={h.Value}"))}");
+
+
                         // match recorded in hash to see who was matched with
-                        await _redis.HashSetAsync(matchHashKey, hashEntryArr);
-                        return new MatchResultDTO
+                        try
+                        {
+                            // ... all the code to prepare the hashEntryArr ...
+
+                            await _redis.HashSetAsync(matchHashKey, hashEntryArr);
+
+                            // This line will only run if the HashSetAsync call succeeds.
+                            // If you don't see this, it failed.
+                            Console.WriteLine($"Successfully added hash entries for {playerId} and {opponent}.");
+
+                            return new MatchResultDTO
+                            {
+                                Opponent = opponent,
+                                IsInitiator = true,
+                            };
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Caught exception {ex}");
+                        }
+                            return new MatchResultDTO
                         {
                             Opponent = opponent,
                             IsInitiator = true,
@@ -71,7 +94,8 @@ namespace CodingChallengeReal.Services
                         await _redis.ListRightPushAsync(key, opponent);
                     }
                 }
-                // player matched with someone earlier, so return good result
+
+                // player matched with someone earlier as a non-initiator, so return good result
                 var result = await _redis.HashGetAsync(matchHashKey, playerId);
 
                 if (result.HasValue)
@@ -80,6 +104,7 @@ namespace CodingChallengeReal.Services
                     var opponentId = (string) result;
                     await _redis.SetAddAsync(matchedSetKey, playerId);
                     await _redis.HashDeleteAsync(matchHashKey, new RedisValue[] { playerId, opponentId });
+                    Console.WriteLine("Deleting a match");
                     return new MatchResultDTO
                     {
                         Opponent = opponentId,

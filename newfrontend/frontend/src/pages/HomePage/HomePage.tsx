@@ -3,6 +3,7 @@ import { motion, AnimatePresence, LayoutGroup, scale } from "framer-motion";
 import { button, s } from "motion/react-client";
 import { Select } from "@mantine/core";
 import { SlActionUndo } from "react-icons/sl";
+import CustomButton from "../../components/Button";
 export const HomePage = () => {
   return (
     <div className="h-full bg-navbar-bg flex items-center justify-center overflow-hidden">
@@ -74,6 +75,7 @@ export const HomeBody = () => {
         buttonChosen: number;
         small?: boolean;
         queue?: boolean;
+        onClick?: () => {};
     }
 
     const SelectButton = ({buttonChosen, children, small, queue} : SelectButtonProps) => {
@@ -121,13 +123,13 @@ export const HomeBody = () => {
             setCasualCompVisible(-1)
             setCurrentlySelected(-1);
             setQueueVisible(false);
-        } else if (step-1 == 2) {
-            
-            
         }
 
     }
 
+    const startQueue = () => {
+      
+    }
 
     return (
         <div className="h-full w-full bg-navbar-bg flex items-center justify-center overflow-hidden">
@@ -193,9 +195,9 @@ export const HomeBody = () => {
 
             {queueVisible && (
               <motion.div>
-                <SelectButton buttonChosen={100} queue>
+                <CustomButton className="w-300 h-40" tailwindTextSize={"text-4xl"} pulse onClick={() => startQueue()}>
                   QUEUE
-                </SelectButton>
+                </CustomButton>
               </motion.div>
             )}
           </LayoutGroup>

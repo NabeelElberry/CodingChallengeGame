@@ -189,6 +189,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -203,37 +210,6 @@
         "tags": [
           "Match"
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/Match/judge": {
-      "post": {
-        "tags": [
-          "Match"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JudgeQuestionDTO"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JudgeQuestionDTO"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/JudgeQuestionDTO"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "OK"
@@ -712,24 +688,6 @@
           "id": {
             "type": "string",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "JudgeQuestionDTO": {
-        "type": "object",
-        "properties": {
-          "userCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "languageId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "questionId": {
-            "type": "string",
-            "format": "uuid"
           }
         },
         "additionalProperties": false

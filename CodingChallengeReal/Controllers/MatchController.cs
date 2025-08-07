@@ -24,15 +24,15 @@ namespace CodingChallengeReal.Controllers
         private readonly IMatchService _matchService;
         private readonly IHubContext<MatchHub> _matchHub;
         private readonly EnqueueService _enqueueService;
+        private readonly Matchmaker _matchmaker;
         private readonly IMatchRepository _matchRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
-        private readonly String Judge0URL = "http://107.23.165.87:2358";
-        private String pythonBoilerplate = "";
+        // private readonly String Judge0URL = "http://107.23.165.87:2358";
 
 
 
-        public MatchController(IMatchRepository matchRepository, IMapper mapper, IQuestionRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService)
+        public MatchController(IMatchRepository matchRepository, IMapper mapper, IQuestionRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService, Matchmaker matchmaker)
         {
             _matchService = matchService;
             _matchHub = matchHub;
@@ -40,8 +40,8 @@ namespace CodingChallengeReal.Controllers
             _matchRepository = matchRepository;
             _questionRepository = questionRepository;
             _mapper = mapper;
+            _matchmaker = matchmaker;
         }
-
 
         [HttpPost]
         public async Task<IActionResult> AddMatchAsync(AddMatchDTO addMatchRequest)
@@ -90,76 +90,52 @@ namespace CodingChallengeReal.Controllers
 
         [HttpPost]
         [Route("/queueUsers")]
-        public async Task<IActionResult> QueueUsersTogetherAsync(string userId, int mmr)
+        public async Task<IActionResult> QueueUsersTogetherAsync(
+            [FromQuery] string userId,
+            [FromQuery] int mmr,
+            [FromQuery] string mode)
         {
-            int searchRadius = 0;
-            (int, int) min_max = _enqueueService.EnqueuePlayer(userId, mmr); // enqueue the player into redis database
-            var min = min_max.Item1;
-            var max = min_max.Item2;
-            var original = $"elo_queue_{min}_{max}";
-            // find user in specific elo bracket, if none found expand out after 10 seconds
-            MatchResultDTO? result = null;
+            //int searchRadius = 0;
+            //(int, int) min_max = _enqueueService.EnqueuePlayer(userId, mmr); // enqueue the player into redis database
+            //var min = min_max.Item1;
+            //var max = min_max.Item2;
 
-            // does 10 different brackets
-            for (int r = 0; r < 10; r++)
+            if (mode == "casual") // casual mode doesn't need hard searching, slam everyone into the same redis queue and search from there
             {
-                // go through all the brackets up to searchRadius, guaranteed to be at least 1
-                for (int i = 0; i < r; i++)
-                {
+                var redis_queue = "queue";
 
-                    var offset = searchRadius * 100;
-
-                    var lowerBucket = original;
-                    var upperBucket = $"elo_queue_{min + (offset)}_{max + (offset)}";
-                    if (min != 0)
-                    {
-                        lowerBucket = $"elo_queue_{min - (offset)}_{max - (offset)}";
-                    }
-
-                    Console.WriteLine("Searching original...");
-                    result = await _enqueueService.AttemptMatchPlayer(min, max, userId); // search original bracket
-
-
-                    if (lowerBucket != original && result == null) // actually search the lower bucket if different than original bracket, and match not found
-                    {
-                        result = await _enqueueService.AttemptMatchPlayer(min - offset, max - offset, userId);
-
-                        Console.WriteLine($"Searching lower bucket {min - offset} {max - offset}");
-                    }
-                    if (result == null) // search upper bracket if nothing was found in lower
-                    {
-                        result = await _enqueueService.AttemptMatchPlayer(min + offset, max + offset, userId);
-                        Console.WriteLine($"Searching upper bucket {min + offset} {max + offset}");
-                    }
-
-                    if (result != null) // match was found, stop queueing
-                    {
-                        if (result?.Opponent != null && result.IsInitiator) // only one match will be made depending on who the "initiator" was.
-                        {
-                            AddMatchDTO matchDto = new AddMatchDTO(userId, result.Opponent, null, null, null);
-                            var match = await _matchService.AddMatchAsync(matchDto); // makes a match in DB
-
-                            await _matchHub.Clients.User(userId).SendAsync("MatchFound", match.id);
-                            await _matchHub.Clients.User(result.Opponent.Value).SendAsync("MatchFound", match.id);
-                            Console.WriteLine($"userId: {userId}, OPPONENT VAL: {result.Opponent.Value}, OPPONENT: {result.Opponent}");
-
-                            return Ok(matchDto);
-                        }
-                        else
-                        {
-                            return Ok(true);
-                        }
-
-                    }
-                    Console.WriteLine($"Found match in search radius {searchRadius}: {result != null}");
-                }
-                searchRadius += 1;
+                return Ok(true);
             }
+            else
+            { // need search matchmaking for competitive
+                MatchResultDTO? result = null;
+                result = await _matchmaker.AttemptMatchPlayer(mmr, userId);
+                
+                if (result != null) // match was found, stop queueing
+                {
+                    if (result?.Opponent != null && result.IsInitiator) // only one match will be made depending on who the "initiator" was.
+                    {
+                        AddMatchDTO matchDto = new AddMatchDTO(userId, result.Opponent, null, null, null);
+                        var match = await _matchService.AddMatchAsync(matchDto); // makes a match in DB
 
+                        await _matchHub.Clients.User(userId).SendAsync("MatchFound", match.id);
+                        await _matchHub.Clients.User(result.Opponent.Value).SendAsync("MatchFound", match.id);
+                        Console.WriteLine($"userId: {userId}, OPPONENT VAL: {result.Opponent.Value}, OPPONENT: {result.Opponent}");
 
-            return Ok(null);
+                        return Ok(matchDto);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Non initiator: {result}");
+                        return Ok(true);
+                    }
 
+                }
+
+                return Ok(null);
+            }
         }
+
         [HttpGet("debug-claims")]
         public IActionResult DebugClaims()
         {
@@ -171,48 +147,48 @@ namespace CodingChallengeReal.Controllers
             return Ok("Check console output.");
         }
 
-        [HttpPost("judge")]
-        public async Task<IActionResult> JudgeAnswer(JudgeQuestionDTO judgeQuestionDTO)
-        {
-            String endpoint = $"{Judge0URL}/submissions/?base64_encoded=false&wait=true";
+        //[HttpPost("judge")]
+        //public async Task<IActionResult> JudgeAnswer(JudgeQuestionDTO judgeQuestionDTO)
+        //{
+        //    String endpoint = $"{Judge0URL}/submissions/?base64_encoded=false&wait=true";
 
-            QuestionDTO question = await _questionRepository.GetAsync(judgeQuestionDTO.QuestionId);
-            String fullCode;
-            Console.WriteLine($"{judgeQuestionDTO.LanguageId} {judgeQuestionDTO.UserCode} {judgeQuestionDTO.QuestionId}");
-            // python case
-            if (judgeQuestionDTO.LanguageId == 71)
-            {
-                fullCode = BuildFullPythonCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["python"]);
-                Console.WriteLine($"fullCode:\n{fullCode}");
-            }
-            else if (judgeQuestionDTO.LanguageId == 62) // java
-            {
-                fullCode = BuildFullJavaCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["java"]);
-                Console.WriteLine($"fullCode:\n{fullCode}");
-            }
-            else // CPP
-            {
-                fullCode = BuildFullCPPCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["cpp"]);
-                Console.WriteLine($"fullCode:\n{fullCode}");
-            }
+        //    QuestionDTO question = await _questionRepository.GetAsync(judgeQuestionDTO.QuestionId);
+        //    String fullCode;
+        //    Console.WriteLine($"{judgeQuestionDTO.LanguageId} {judgeQuestionDTO.UserCode} {judgeQuestionDTO.QuestionId}");
+        //    // python case
+        //    if (judgeQuestionDTO.LanguageId == 71)
+        //    {
+        //        fullCode = BuildFullPythonCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["python"]);
+        //        Console.WriteLine($"fullCode:\n{fullCode}");
+        //    }
+        //    else if (judgeQuestionDTO.LanguageId == 62) // java
+        //    {
+        //        fullCode = BuildFullJavaCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["java"]);
+        //        Console.WriteLine($"fullCode:\n{fullCode}");
+        //    }
+        //    else // CPP
+        //    {
+        //        fullCode = BuildFullCPPCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["cpp"]);
+        //        Console.WriteLine($"fullCode:\n{fullCode}");
+        //    }
 
-            var payload =
-            new
-            {
-                source_code = fullCode,
-                language_id = judgeQuestionDTO.LanguageId,
-                stdin = "",
-                expected_output = ""
-            };
+        //    var payload =
+        //    new
+        //    {
+        //        source_code = fullCode,
+        //        language_id = judgeQuestionDTO.LanguageId,
+        //        stdin = "",
+        //        expected_output = ""
+        //    };
 
-            Console.WriteLine("Payload: " + JsonSerializer.Serialize(payload));
-            var client = new HttpClient();
-            var content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
-            var judge0Response = await client.PostAsync(endpoint, content);
+        //    Console.WriteLine("Payload: " + JsonSerializer.Serialize(payload));
+        //    var client = new HttpClient();
+        //    var content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+        //    var judge0Response = await client.PostAsync(endpoint, content);
 
-            var judge0Json = await judge0Response.Content.ReadAsStringAsync();
-            return Content(judge0Json, "application/json");
-        }
+        //    var judge0Json = await judge0Response.Content.ReadAsStringAsync();
+        //    return Content(judge0Json, "application/json");
+        //}
 
 
         /* The structure here is 

@@ -105,22 +105,6 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
-    "Method": "JudgeAnswer",
-    "RelativePath": "Match/judge",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "judgeQuestionDTO",
-        "Type": "CodingChallengeReal.DTO.JudgeQuestionDTO",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
     "Method": "AddQuestionAsync",
     "RelativePath": "Question",
@@ -231,6 +215,11 @@
       {
         "Name": "mmr",
         "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "mode",
+        "Type": "System.String",
         "IsRequired": false
       }
     ],
