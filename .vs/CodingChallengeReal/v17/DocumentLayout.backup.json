@@ -126,8 +126,7 @@
               "RelativeToolTip": "CodingChallengeReal\\Controllers\\MatchController.cs",
               "ViewState": "AgIAAIEAAAAAAAAAAAAqwJUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-17T15:04:13.73Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-17T15:04:13.73Z"
             },
             {
               "$type": "Document",
@@ -139,8 +138,7 @@
               "RelativeToolTip": "CodingChallengeReal\\Services\\MatchService.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAAcAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-17T15:57:56.349Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-17T15:57:56.349Z"
             },
             {
               "$type": "Document",
@@ -152,8 +150,7 @@
               "RelativeToolTip": "CodingChallengeReal\\Repositories\\Interface\\IMatchRepository.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-17T15:14:47.569Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-17T15:14:47.569Z"
             },
             {
               "$type": "Document",
@@ -163,7 +160,7 @@
               "RelativeDocumentMoniker": "CodingChallengeReal\\Services\\Matchmaker.cs",
               "ToolTip": "C:\\Users\\nabee\\source\\repos\\CodingChallengeReal\\CodingChallengeReal\\Services\\Matchmaker.cs",
               "RelativeToolTip": "CodingChallengeReal\\Services\\Matchmaker.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAgwCIAAAAoAAAAAAAAAA==",
+              "ViewState": "AgIAABUAAAAAAAAAAAAgwCsAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-04T20:55:51.601Z",
               "EditorCaption": ""
@@ -268,8 +265,7 @@
               "RelativeToolTip": "CodingChallengeReal\\Domains\\Match.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-11T19:43:08.083Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-11T19:43:08.083Z"
             },
             {
               "$type": "Document",
@@ -294,8 +290,7 @@
               "RelativeToolTip": "CodingChallengeReal\\Repositories\\Implementation\\MatchRepository.cs",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAADUAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-17T15:14:54.492Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-17T15:14:54.492Z"
             },
             {
               "$type": "Document",
@@ -307,8 +302,7 @@
               "RelativeToolTip": "CodingChallengeReal\\DTO\\AddMatchDTO.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-11T19:12:47.371Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-11T19:12:47.371Z"
             },
             {
               "$type": "Document",

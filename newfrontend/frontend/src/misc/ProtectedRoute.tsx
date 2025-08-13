@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useUrl } from "../store/AuthCtx";
+import { useAuth } from "../store/AuthCtx";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -8,21 +8,22 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const authCtx = useUrl();
+  const authCtx = useAuth();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     (async () => {
         try {
-            await axios.get(`${authCtx.API_URL}/auth`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`
-            },
-        });
-            authCtx.setAuthenticationStatus(true);
+          const token = await authCtx.user?.getIdToken(true);
+          await axios.get(`${authCtx.API_URL}/auth`, {
+          headers: {
+              Authorization: `Bearer ${token}`
+          },
+          });
+          authCtx.setAuthenticationStatus(true);
         }
         catch {
-            authCtx.setAuthenticationStatus(false);
+          authCtx.setAuthenticationStatus(false);
         } 
         setChecking(false);
     })();

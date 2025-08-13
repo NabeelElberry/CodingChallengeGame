@@ -1,20 +1,21 @@
-import { Button, Image, Modal, PasswordInput, TextInput } from "@mantine/core"
+import { Image, Modal, PasswordInput, TextInput } from "@mantine/core"
 import logo from "../../assets/logo.png";
 import CustomButton from "../../components/Button";
 import { useDisclosure } from "@mantine/hooks";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useForm } from "@mantine/form";
-import { button } from "motion/react-client";
+
 import { auth, createUser, signInUser } from "../../config/firebase";
-import { useUrl } from "../../store/AuthCtx";
+import { useAuth } from "../../store/AuthCtx";
 import { signOut } from "firebase/auth";
-import {jwtDecode} from "jwt-decode";
-import axios from "axios";
+
+
 import { useNavigate } from "react-router-dom";
+import authorizedCall from "../../misc/authorizedCall";
 
 
 export const HeroHeader = () => {
-    const authCtx = useUrl();
+    const authCtx = useAuth();
     const navigate = useNavigate();
 
 
@@ -49,17 +50,13 @@ export const HeroHeader = () => {
         const userCredential = await createUser(email, password) // firebase
         const uid = userCredential.user.uid;
         // adding user into dynamodb
-        const response = await axios.post(`http://localhost:5270/User`, 
-            {
+
+        const response = await authorizedCall(authCtx, "POST", "User", "B", {
                 username: username,
                 email: email,
                 password: password,
                 id: uid
-            }, {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
+            })
         close();
         if (response.status == 200) {
             return true;
@@ -75,10 +72,11 @@ export const HeroHeader = () => {
         if (!userCredential.user) {
             throw new Error("Username and password do not match.")
         } else {
+            console.log("User sign in successful.");
             const token = await userCredential.user.getIdToken(true);
             authCtx.setAuthenticationStatus(true);
             authCtx.setUID(userCredential.user.uid);
-            console.log("authenticaiton status: ", authCtx.authenticationStatus)
+            console.log("auth status: ", authCtx.authenticationStatus)
             authCtx.setAccessToken(token);
             localStorage.setItem("access_token", token);
             navigate("/home");

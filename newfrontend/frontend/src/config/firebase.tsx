@@ -1,8 +1,5 @@
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import firebase from "firebase/compat/app";
-import axios from "axios";
-import { useUrl } from "../store/AuthCtx";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC1TyBaoI10D2jIx_P0xS4nUwy9qL4Jvao",

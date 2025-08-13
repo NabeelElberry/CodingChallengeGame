@@ -67,4 +67,4 @@ export const UrlContextProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useUrl = () => useContext(UrlCtx);
+export const useAuth = () => useContext(UrlCtx);
