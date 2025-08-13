@@ -21,11 +21,5 @@ namespace CodingChallengeReal.DTO
 
         [JsonPropertyName("winner")]
         public int? winner { get; set; }
-
-        [JsonPropertyName("question_id")]
-        public string question_id { get; set; }
-
-        [JsonPropertyName("winning_soln_code")]
-        public string? winning_soln_code { get; set; }
     }
 }

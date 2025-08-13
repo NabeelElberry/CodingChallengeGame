@@ -77,6 +77,7 @@ export const HeroHeader = () => {
         } else {
             const token = await userCredential.user.getIdToken(true);
             authCtx.setAuthenticationStatus(true);
+            authCtx.setUID(userCredential.user.uid);
             console.log("authenticaiton status: ", authCtx.authenticationStatus)
             authCtx.setAccessToken(token);
             localStorage.setItem("access_token", token);
@@ -105,7 +106,7 @@ export const HeroHeader = () => {
         open()
     }
 
-    return <div className="bg-navbar-bg flex flex-row w-full p-3 items-center shadow-sm">
+    return <div className="bg-navbar-bg flex flex-row w-full z-50 p-3 items-center shadow-sm">
         <Image src={logo} w={80} className="w-24 h-auto"/>
         <div className="grow h-min flex flex-row gap-5 justify-end">
             <Modal size={"md"} centered transitionProps={{ transition: 'fade', duration: 200 }} opened={opened} onClose={close} title={buttonClicked == 0 ? "Sign Up" : "Login"} 

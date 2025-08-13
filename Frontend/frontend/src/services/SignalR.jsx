@@ -9,7 +9,7 @@ const connection = new signalR.HubConnectionBuilder()
   .withAutomaticReconnect()
   .build();
 
-  connection.on("MatchFound", (matchId) => {
+  connection.on("MatchFound", () => {
     console.log("Match Found");
     connection.invoke("JoinMatchRoom", matchId);
   })

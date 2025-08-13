@@ -81,8 +81,6 @@ namespace CodingChallengeReal.Controllers
             match.user1 = addMatchDTO.user1;
             match.user2 = addMatchDTO.user2;
             match.winner = addMatchDTO.winner;
-            match.question_id = addMatchDTO.question_id;
-            match.winning_soln_code = addMatchDTO.winning_soln_code;
             var updatedUser = await _matchRepository.UpdateAsync(id, _mapper.Map<Match>(match));
 
             return Ok(updatedUser);
@@ -95,10 +93,6 @@ namespace CodingChallengeReal.Controllers
             [FromQuery] int mmr,
             [FromQuery] string mode)
         {
-            //int searchRadius = 0;
-            //(int, int) min_max = _enqueueService.EnqueuePlayer(userId, mmr); // enqueue the player into redis database
-            //var min = min_max.Item1;
-            //var max = min_max.Item2;
 
             if (mode == "casual") // casual mode doesn't need hard searching, slam everyone into the same redis queue and search from there
             {
@@ -110,29 +104,33 @@ namespace CodingChallengeReal.Controllers
             { // need search matchmaking for competitive
                 MatchResultDTO? result = null;
                 result = await _matchmaker.AttemptMatchPlayer(mmr, userId);
-                
-                if (result != null) // match was found, stop queueing
+
+                if (result != null) // match was found, return true for initiator
                 {
                     if (result?.Opponent != null && result.IsInitiator) // only one match will be made depending on who the "initiator" was.
                     {
-                        AddMatchDTO matchDto = new AddMatchDTO(userId, result.Opponent, null, null, null);
-                        var match = await _matchService.AddMatchAsync(matchDto); // makes a match in DB
+                        AddMatchDTO matchDto = new AddMatchDTO(userId, result.Opponent, null);
+                        //var match = await _matchService.AddMatchAsync(matchDto); // makes a match in DB
 
-                        await _matchHub.Clients.User(userId).SendAsync("MatchFound", match.id);
-                        await _matchHub.Clients.User(result.Opponent.Value).SendAsync("MatchFound", match.id);
+                        await _matchHub.Clients.User(userId).SendAsync("MatchFound");
+                        await _matchHub.Clients.User(result.Opponent.Value).SendAsync("MatchFound");
                         Console.WriteLine($"userId: {userId}, OPPONENT VAL: {result.Opponent.Value}, OPPONENT: {result.Opponent}");
 
-                        return Ok(matchDto);
+                        return Ok(new { initiator = true, matchDto });
                     }
-                    else
+                    else // here we want false for the non-initiator
                     {
+                        AddMatchDTO matchDto = new AddMatchDTO(userId, result.Opponent, null);
                         Console.WriteLine($"Non initiator: {result}");
-                        return Ok(true);
+                        return Ok(new { initiator = false, matchDto });
                     }
 
                 }
+                else // user was in another match, or something went wrong. Return null in this case
+                {
+                    return Ok(null);
+                }
 
-                return Ok(null);
             }
         }
 
@@ -147,175 +145,9 @@ namespace CodingChallengeReal.Controllers
             return Ok("Check console output.");
         }
 
-        //[HttpPost("judge")]
-        //public async Task<IActionResult> JudgeAnswer(JudgeQuestionDTO judgeQuestionDTO)
-        //{
-        //    String endpoint = $"{Judge0URL}/submissions/?base64_encoded=false&wait=true";
 
-        //    QuestionDTO question = await _questionRepository.GetAsync(judgeQuestionDTO.QuestionId);
-        //    String fullCode;
-        //    Console.WriteLine($"{judgeQuestionDTO.LanguageId} {judgeQuestionDTO.UserCode} {judgeQuestionDTO.QuestionId}");
-        //    // python case
-        //    if (judgeQuestionDTO.LanguageId == 71)
-        //    {
-        //        fullCode = BuildFullPythonCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["python"]);
-        //        Console.WriteLine($"fullCode:\n{fullCode}");
-        //    }
-        //    else if (judgeQuestionDTO.LanguageId == 62) // java
-        //    {
-        //        fullCode = BuildFullJavaCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["java"]);
-        //        Console.WriteLine($"fullCode:\n{fullCode}");
-        //    }
-        //    else // CPP
-        //    {
-        //        fullCode = BuildFullCPPCode(question.MethodName, judgeQuestionDTO.UserCode, question.SampleTestCases, question.HiddenTestCases, question.CompareFunc["cpp"]);
-        //        Console.WriteLine($"fullCode:\n{fullCode}");
-        //    }
-
-        //    var payload =
-        //    new
-        //    {
-        //        source_code = fullCode,
-        //        language_id = judgeQuestionDTO.LanguageId,
-        //        stdin = "",
-        //        expected_output = ""
-        //    };
-
-        //    Console.WriteLine("Payload: " + JsonSerializer.Serialize(payload));
-        //    var client = new HttpClient();
-        //    var content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
-        //    var judge0Response = await client.PostAsync(endpoint, content);
-
-        //    var judge0Json = await judge0Response.Content.ReadAsStringAsync();
-        //    return Content(judge0Json, "application/json");
-        //}
-
-
-        /* The structure here is 
-         * class Solution:
-         *     def methodName: 
-         *          {userCode}
-         *     assert statements
-         */
-        private static string BuildFullPythonCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
-        {
-            string typingImports = "from typing import List, Dict, Tuple, Set, Optional, Any, Union\n";
-            string fullCode = typingImports + userCode.Trim();
-
-            IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
-                    $"result = Solution().{methodName}({tc.Input})\nexpected = {JsonSerializer.Serialize(tc.Output)}\nassert {compareFunc}\nprint('Input:', {tc.Input})\nprint('Result:', result)\nprint('Expected:', expected)\nprint('Expected type: ', type(expected))\nprint('result type: ', type(result))\nprint('sorted result', sorted(result))\nprint('sorted eval expected: ', sorted(eval(expected)))\nprint('type sorted result', type(sorted(result)))\nprint('type sorted eval expected: ', type(sorted(eval(expected))))\n");
-
-            fullCode += "\n\n" + string.Join("\n\n", FormatTestBlock(sampleTestCases));
-            fullCode += "\n\n" + string.Join("\n\n", FormatTestBlock(hiddenTestCases));
-            fullCode += "print(\"ALL TESTS PASSED\")";
-
-            return fullCode;
-        }
-
-        private static string BuildFullCPPCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
-        {
-            IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
-        $@"    {{
-        auto result = sol.{methodName}({tc.Input});
-        auto expected = {tc.Output};
-        bool passed = [&]() {{
-{WrapCompareFunc(compareFunc, "cpp", "            ")}
-            return passed;
-        }}();
-
-        if (!passed) {{
-            cout << ""FAILED TEST"" << endl;
-            cout << ""Input: {tc.Input}"" << endl;
-            cout << ""(Add more detailed result/expected prints in compare_func if needed)"" << endl;
-            exit(1);
-        }}
-    }}");
-
-            string mainBlock = $@"
-int main() {{
-    Solution sol;
-{string.Join("\n", FormatTestBlock(sampleTestCases))}
-{string.Join("\n", FormatTestBlock(hiddenTestCases))}
-    cout << ""All tests passed"" << endl;
-}}";
-
-            return $@"#include <cassert>
-#include <string>
-#include <vector>
-#include <iostream>
-#include <algorithm>
-using namespace std;
-
-{userCode.Trim()}
-
-{mainBlock}";
-        }
-
-
-        private static string BuildFullJavaCode(string methodName, string userCode, List<TestCaseDTO> sampleTestCases, List<TestCaseDTO> hiddenTestCases, string compareFunc)
-        {
-            IEnumerable<string> FormatTestBlock(List<TestCaseDTO> testCases) => testCases.Select(tc =>
-        $@"        {{
-            var result = sol.{methodName}({tc.Input});
-            var expected = {tc.Output};
-            boolean passed = false;
-            try {{
-{WrapCompareFunc(compareFunc, "java", "                ")}
-            }} catch (Exception e) {{
-                System.out.println(""Exception during comparison: "" + e);
-            }}
-
-            if (!passed) {{
-                System.out.println(""FAILED TEST"");
-                System.out.println(""Input: {tc.Input}"");
-                System.out.println(""Expected: "" + Arrays.toString(expected));
-                System.out.println(""Got: "" + Arrays.toString(result));
-                System.exit(1);
-            }}
-        }}");
-
-            var mainBlock = $@"
-public class Main {{
-    public static void main(String[] args) {{
-        Solution sol = new Solution();
-{string.Join("\n", FormatTestBlock(sampleTestCases))}
-{string.Join("\n", FormatTestBlock(hiddenTestCases))}
-        System.out.println(""All tests passed"");
-    }}
-}}";
-
-            return @"import java.util.*;
-import java.util.Arrays;
-
-" + userCode.Trim() + "\n\n" + mainBlock;
-        }
-
-
-        private static string WrapCompareFunc(string compareFunc, string language, string indent = "    ")
-        {
-            var lines = compareFunc.Trim().Split('\n').Select(l => l.Trim()).ToList();
-
-            if (lines.Count == 1 && lines[0].StartsWith("return "))
-            {
-                string expr = lines[0].Substring("return ".Length).TrimEnd(';');
-                return $"{indent}passed = {expr};";
-            }
-
-            // Multi-line case — replace first return line
-            for (int i = 0; i < lines.Count; i++)
-            {
-                if (lines[i].StartsWith("return "))
-                {
-                    string expr = lines[i].Substring("return ".Length).TrimEnd(';');
-                    lines[i] = $"passed = {expr};";
-                    break;
-                }
-            }
-
-            return string.Join("\n", lines.Select(line => indent + line));
-        }
     }
-    }
+}
 
 
 

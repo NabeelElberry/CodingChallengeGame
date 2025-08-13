@@ -17,63 +17,58 @@ namespace CodingChallengeReal.Services
         }
 
         const string lua = @"
-            -- KEYS = { queueKey, matchedSetKey, matchHashKey }
-            -- ARGV = { playerId }
+        -- KEYS = { queueKey, matchedSetKey, matchHashKey }
+        -- ARGV = { playerId }
 
-            local queueKey    = KEYS[1]
-            local matchedSet  = KEYS[2]
-            local matchHash   = KEYS[3]
-            local me          = ARGV[1]
+        local queueKey   = KEYS[1]
+        local matchedSet = KEYS[2]
+        local matchHash  = KEYS[3]
+        local me         = ARGV[1]
 
-            -- 5) Maybe someone else matched me in the meantime?
-            local theirOpp = redis.call('HGET', matchHash, me)
-            if theirOpp then
-                redis.call('SADD', matchedSet, me)
-                -- redis.call('HDEL', matchHash, me, theirOpp)
-                -- scrub my entry in case I’m still in line somewhere
-                redis.call('LREM', queueKey, 0, me)
-                return { 'joiner', theirOpp }
-            end
+        -- 0) If I'm marked busy (initiator from a previous match), don't requeue.
+        if redis.call('SISMEMBER', matchedSet, me) == 1 then
+          redis.call('LREM', queueKey, 0, me)
+          return { 'busy'}
+        end
 
+        -- 1) If someone already paired me, I'm the joiner.
+        local theirOpp = redis.call('HGET', matchHash, me)
+        if theirOpp then
+          -- do NOT add me to the set (only initiator lives there)
+          redis.call('LREM', queueKey, 0, me)
+          redis.call('SADD', matchedSet, me)
+          return { 'joiner', theirOpp }
+        end
 
-            -- 1) If I’m already matched, just clean myself up
-            if redis.call('SISMEMBER', matchedSet, me) == 1 then
-                redis.call('LREM', queueKey, 0, me)
-                return nil
-            end
+        -- 2) Not enough people in line
+        if redis.call('LLEN', queueKey) < 2 then
+          return nil
+        end
 
-            -- 2) If fewer than 2 in line, bail out (keeps the list alive)
-            if redis.call('LLEN', queueKey) < 2 then
-                return nil
-            end
+        -- 3) Remove me so I don't self-match
+        redis.call('LREM', queueKey, 0, me)
 
-            -- 3) Remove me so I don’t self-match
-            redis.call('LREM', queueKey, 0, me)
+        -- 4) Try to pop an opponent
+        local opp = redis.call('RPOP', queueKey)
+        if opp then
+          -- Opponent must not be busy (initiator elsewhere) and must not be hash-paired already
+          if redis.call('SISMEMBER', matchedSet, opp) == 0 and redis.call('HEXISTS', matchHash, opp) == 0 then
+            -- Mark ONLY ME (initiator) busy
+            redis.call('SADD', matchedSet, me)
+            -- Record pairing both ways
+            redis.call('HSET', matchHash, me, opp, opp, me)
+            -- Ensure opp not lingering in queue
+            redis.call('LREM', queueKey, 0, opp)
+            return { 'initiator', opp }
+          else
+            -- Put them back if they were busy/paired
+            redis.call('RPUSH', queueKey, opp)
+          end
+        end
 
-            -- 4) Try to pop someone off the right
-            local opp = redis.call('RPOP', queueKey)
-            if opp then
-                -- If they’re free, record the match and scrub both entries
-                if redis.call('SISMEMBER', matchedSet, opp) == 0 then
-                -- mark busy
-                redis.call('SADD', matchedSet, me, opp)
-                -- record pairing
-                redis.call('HSET', matchHash, me, opp, opp, me)
-                -- ensure neither remains in the queue
-                redis.call('LREM', queueKey, 0, opp)
-                -- return initiator + opponent
-                return { 'initiator', opp }
-                else
-                -- if they were already busy, put them back
-                redis.call('RPUSH', queueKey, opp)
-                end
-            end
+        -- 5) Nothing to do
+        return nil
 
-           
-            
-
-            -- 6) Nothing to do
-            return nil
         ";
 
 
@@ -173,12 +168,9 @@ namespace CodingChallengeReal.Services
 
             if (result.Length != 0) // match found break out
             {
-
-                Console.WriteLine($"Array: {result}: array length: {result.Length}");
-
-                foreach (RedisResult r in result)
+                if (result.Length == 1) // we are busy, just return null.
                 {
-                    Console.WriteLine($"item: {r.ToString()}");
+                    return null;
                 }
 
                 var role = (string)result[0];

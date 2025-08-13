@@ -608,14 +608,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          },
-          "question_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "winning_soln_code": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
