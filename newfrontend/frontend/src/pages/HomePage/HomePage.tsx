@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { SlActionUndo } from "react-icons/sl";
 import CustomButton from "../../components/Button";
@@ -34,7 +34,7 @@ export const HomeBody = () => {
   const authCtx = useAuth();
 
   // websockets
-  const { connectionRef, foundStatus, setFoundStatus } = useSignalR();
+  const { connectionRef } = useSignalR();
   // state
   const [matchData, setMatchData] = useState<MatchResponse | null>(null);
   const [step, setStep] = useState(0);
@@ -44,7 +44,12 @@ export const HomeBody = () => {
   const [casualCompVisible, setCasualCompVisible] = useState(-1); // -1 means none visible, 0 means both, 1 means casual, 2 means comp
   const [queueVisible, setQueueVisible] = useState(false);
   const [matchFound, setMatchFound] = useState(false);
-  const [responseState, setResponseState] = useState();
+  const [responseState, setResponseState] = useState(false);
+  const [foundStatus, setFoundStatus] = useState(false);
+  useEffect(() => {
+    console.log("in use effect: ");
+    setFoundStatus(false);
+  }, [responseState]);
 
   const updateSelectedButtons = (chosen: number) => {
     setCurrentlySelected(chosen);
@@ -174,13 +179,12 @@ export const HomeBody = () => {
     const param = matchData?.matchDto;
 
     console.log(`USER1: ${param?.user1}, user2 ${param?.user2}`);
-    const sendSignal = (confirm: boolean) => {
-      let response;
+    const sendSignal = async (confirm: boolean) => {
       if (param) {
         try {
-          response = connectionRef.current
+          connectionRef.current
             ?.invoke("JoinMatchRoom", param.user1, param.user2, confirm)
-            .then((value) => setResponseState(value));
+            .then((value) => setResponseState(true));
         } catch {
           console.log("Ran into an error");
         }
@@ -192,7 +196,7 @@ export const HomeBody = () => {
       }
     };
 
-    return responseState ? (
+    return foundStatus ? (
       <div className="absolute w-full h-full backdrop-brightness-50 z-10 flex flex-col gap-2 items-center overflow-hidden justify-center">
         <button
           onClick={() => sendSignal(true)}
