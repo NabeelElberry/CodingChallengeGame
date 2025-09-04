@@ -13,6 +13,7 @@ import { BunnySprite } from "../BunnySprite";
 import { useEffect, useRef, useState } from "react";
 import { checkForAABB } from "../Utils/pixiutils";
 import type { xyInterface } from "../Utils/interfaces";
+import { JsonInput } from "@mantine/core";
 
 extend({ Container, Graphics, Sprite });
 
@@ -57,21 +58,26 @@ const PixiContainer = () => {
   ];
   const [playerJumping, setPlayerJumping] = useState(false);
   const playerRef = useRef<Sprite | null>(null);
-  const [gapArray, setGapArray] = useState([800]);
+  const [gapArray, setGapArray] = useState<number[]>([]);
   const { app } = useApplication();
+  const [velocityY, setVelocity] = useState(0);
 
+  const jumpPower = -3;
+  const gravity = 0.05;
   const gameY = app.screen.height - 180;
   let i = 0;
   useEffect(() => {
-    for (let i = 0; i < 200; i++) {
-      setGapArray((prev) => {
-        const topElement = prev[prev.length - 1];
+    setGapArray(() => {
+      const newArray: number[] = [];
+      for (let i = 0; i < 200; i++) {
+        const topElement = newArray[newArray.length - 1] ?? 0;
         // 150 is the base spacing guaranteed, with a variation of randomness of 0 - 200 added onto it
-        prev.push(topElement + 150 + Math.random() * 200);
-        return prev;
-      });
-    }
-  }, [gapArray]);
+        newArray.push(topElement + 300 + Math.random() * 100);
+      }
+      console.log(newArray);
+      return newArray;
+    });
+  }, []);
 
   useTick((time) => {
     const dx = time.deltaTime * 5;
@@ -88,23 +94,38 @@ const PixiContainer = () => {
     });
 
     // keep dinosaur grounded;
-    if (playerRef.current && playerRef.current.y <= gameY) {
-      playerRef.current.y = Math.max(
-        playerRef.current.y,
-        playerRef.current.y + gravity
-      );
+
+    if (playerRef.current) {
+      // jump logic
+
+      //console.log(`velocityY ${velocityY} currentY ${playerRef.current.y}`);
+
+      if (playerJumping) {
+        //console.log("Player jumped");
+
+        playerRef.current.y += velocityY;
+        setVelocity((prev) => prev + gravity);
+      }
+      if (playerRef.current.y > gameY) {
+        setPlayerJumping(false);
+        playerRef.current.y = gameY;
+      }
     }
   });
   const keysDown = (e: KeyboardEvent) => {
-    console.log(e.key);
     if (e.key == " " && playerJumping == false && playerRef.current) {
       // spacebar pressed
-      playerRef.current.y += gravity;
-      playerRef.current.y -= 60;
+
+      setPlayerJumping((prev) => {
+        if (!prev) {
+          console.log("Jumped");
+          setVelocity(jumpPower);
+          return true;
+        }
+        return prev; // still true, no new jump
+      });
     }
   };
-  const jumpPower = 10;
-  const gravity = 0.5;
 
   const keysUp = (e: KeyboardEvent) => {
     console.log(e.key);

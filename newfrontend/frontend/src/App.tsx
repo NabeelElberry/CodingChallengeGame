@@ -11,6 +11,8 @@ import { auth } from "./config/firebase";
 import { TestPage } from "./pages/TestPage/TestPage";
 import DinosaurGame from "./pixijs/DinosaurGame/DinosaurGame";
 import TestPixiGame from "./pixijs/TestPixiGame";
+import DragAndDropGame from "./pixijs/DragAndDropGame/DragAndDropGame";
+import SpaceInvadersGame from "./pixijs/SpaceInvadersGame/SpaceInvadersGame";
 
 function App() {
   const authCtx = useAuth();
@@ -44,7 +46,7 @@ function App() {
               path="/test"
               element={
                 <ProtectedRoute>
-                  <DinosaurGame />
+                  <SpaceInvadersGame />
                 </ProtectedRoute>
               }
             />
