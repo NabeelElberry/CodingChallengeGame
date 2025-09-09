@@ -26,13 +26,13 @@ namespace CodingChallengeReal.Controllers
         private readonly EnqueueService _enqueueService;
         private readonly Matchmaker _matchmaker;
         private readonly IMatchRepository _matchRepository;
-        private readonly IQuestionRepository _questionRepository;
+        private readonly IProblemSetRepository _questionRepository;
         private readonly IMapper _mapper;
         // private readonly String Judge0URL = "http://107.23.165.87:2358";
 
 
 
-        public MatchController(IMatchRepository matchRepository, IMapper mapper, IQuestionRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService, Matchmaker matchmaker)
+        public MatchController(IMatchRepository matchRepository, IMapper mapper, IProblemSetRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService, Matchmaker matchmaker)
         {
             _matchService = matchService;
             _matchHub = matchHub;

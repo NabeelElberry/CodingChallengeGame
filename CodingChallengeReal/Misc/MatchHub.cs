@@ -1,7 +1,6 @@
 ﻿using CodingChallengeReal.Domains;
 using CodingChallengeReal.DTO;
 using CodingChallengeReal.Repositories.Interface;
-using CodingChallengeReal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;

@@ -1,12 +1,13 @@
 import * as signalR from "@microsoft/signalr";
 import { useEffect, useRef, useState } from "react";
 import { auth } from "../config/firebase";
+import { useMatchCtx } from "../store/MatchCtx";
 
 const useSignalR = () => {
   const [foundStatus, setFoundStatus] = useState(false);
 
   const connectionRef = useRef<signalR.HubConnection>(null);
-
+  const matchCtx = useMatchCtx();
   useEffect(() => {
     const websockets = async () => {
       const token = await auth.currentUser?.getIdToken();
@@ -36,10 +37,12 @@ const useSignalR = () => {
 
       connectionR.on("MatchDeclined", () => {
         console.log("Match declined");
+        matchCtx.setMatchFound(true);
       });
 
       connectionR.on("MatchAccepted", () => {
         console.log("Match accepted");
+        matchCtx.setMatchFound(true);
       });
 
       connectionR.onclose((err) => {

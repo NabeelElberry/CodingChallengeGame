@@ -105,25 +105,25 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "ContainingType": "CodingChallengeReal.Controllers.ProblemSetController",
     "Method": "AddQuestionAsync",
-    "RelativePath": "Question",
+    "RelativePath": "ProblemSet",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "addQuestionRequest",
-        "Type": "CodingChallengeReal.DTO.AddQuestionDTO",
+        "Type": "CodingChallengeReal.DTO.AddProblemSetDTO",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "ContainingType": "CodingChallengeReal.Controllers.ProblemSetController",
     "Method": "GetQuestionAsync",
-    "RelativePath": "Question",
+    "RelativePath": "ProblemSet",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -137,9 +137,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "ContainingType": "CodingChallengeReal.Controllers.ProblemSetController",
     "Method": "DeleteQuestionAsync",
-    "RelativePath": "Question",
+    "RelativePath": "ProblemSet",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -153,9 +153,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
+    "ContainingType": "CodingChallengeReal.Controllers.ProblemSetController",
     "Method": "UpdateQuestionAsync",
-    "RelativePath": "Question",
+    "RelativePath": "ProblemSet",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -167,20 +167,10 @@
       },
       {
         "Name": "addQuestionRequest",
-        "Type": "CodingChallengeReal.DTO.AddQuestionDTO",
+        "Type": "CodingChallengeReal.DTO.AddProblemSetDTO",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "CodingChallengeReal.Controllers.QuestionController",
-    "Method": "AddBulkQuestionsFromJson",
-    "RelativePath": "Question/AddBulk",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
     "ReturnTypes": []
   },
   {
@@ -221,75 +211,6 @@
         "Name": "mode",
         "Type": "System.String",
         "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "CodingChallengeReal.Controllers.SolutionController",
-    "Method": "AddQuestionAsync",
-    "RelativePath": "Solution",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "addSolutionRequest",
-        "Type": "CodingChallengeReal.DTO.AddSolutionDTO",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "CodingChallengeReal.Controllers.SolutionController",
-    "Method": "GetQuestionAsync",
-    "RelativePath": "Solution",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Guid",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "CodingChallengeReal.Controllers.SolutionController",
-    "Method": "DeleteQuestionAsync",
-    "RelativePath": "Solution",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Guid",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "CodingChallengeReal.Controllers.SolutionController",
-    "Method": "UpdateQuestionAsync",
-    "RelativePath": "Solution",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Guid",
-        "IsRequired": false
-      },
-      {
-        "Name": "addSolutionRequest",
-        "Type": "CodingChallengeReal.DTO.AddSolutionDTO",
-        "IsRequired": true
       }
     ],
     "ReturnTypes": []

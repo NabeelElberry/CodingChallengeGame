@@ -3,7 +3,7 @@ using CodingChallengeReal.Domains;
 using CodingChallengeReal.DTO;
 using CodingChallengeReal.Repositories.Interface;
 
-namespace CodingChallengeReal.Services
+namespace CodingChallengeReal.Repositories.Implementation
 {
     public class MatchService : IMatchService
     {

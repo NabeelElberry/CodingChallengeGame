@@ -1,7 +1,7 @@
 ﻿using CodingChallengeReal.Domains;
 using CodingChallengeReal.DTO;
 
-namespace CodingChallengeReal.Services
+namespace CodingChallengeReal.Repositories.Interface
 {
     public interface IMatchService
     {

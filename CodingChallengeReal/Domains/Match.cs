@@ -9,6 +9,7 @@
         public string user1 { get; set; }
         public string user2 { get; set; }
         public int? winner { get; set; }
+        public string problemSetId { get; set; }
 
     }
 }

@@ -30,9 +30,9 @@ export const HomePage = () => {
 };
 
 export const HomeBody = () => {
-  // auth
+  // contexts
   const authCtx = useAuth();
-
+  const matchCtx = useMatchCtx();
   // websockets
   const { connectionRef } = useSignalR();
   // state
@@ -113,6 +113,7 @@ export const HomeBody = () => {
 
       if (response.data != false) {
         setMatchData(response.data);
+        setMatchFound(true);
       }
     }
   };
@@ -184,19 +185,20 @@ export const HomeBody = () => {
         try {
           connectionRef.current
             ?.invoke("JoinMatchRoom", param.user1, param.user2, confirm)
-            .then((value) => setResponseState(true));
+            .then((value) => {
+              console.log(`Value: ${value}`);
+              setFoundStatus(true);
+            });
+          setMatchFound(false);
+          matchCtx.setMatchFound(false);
         } catch {
           console.log("Ran into an error");
         }
       }
-
-      // remove the buttons FIX THIS
-      if (responseState) {
-        setFoundStatus(false);
-      }
     };
 
-    return foundStatus ? (
+    // basically queue will pop up when we find a match, and when both accept or decline the queue will leave
+    return matchFound && !matchCtx.matchFound ? (
       <div className="absolute w-full h-full backdrop-brightness-50 z-10 flex flex-col gap-2 items-center overflow-hidden justify-center">
         <button
           onClick={() => sendSignal(true)}

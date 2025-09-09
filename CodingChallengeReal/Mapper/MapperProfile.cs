@@ -11,8 +11,8 @@ namespace CodingChallengeReal.Mapper
         {
             CreateMap<UserDTO, User>().ReverseMap();
             CreateMap<AddUserDTO, User>().ReverseMap();
-            CreateMap<QuestionDTO, Question>().ReverseMap();
-            CreateMap<AddQuestionDTO, Question>().ReverseMap();
+            CreateMap<ProblemSetDTO, ProblemSet>().ReverseMap();
+            CreateMap<AddProblemSetDTO, ProblemSet>().ReverseMap();
             CreateMap<MatchDTO, Match>().ReverseMap();
             CreateMap<AddMatchDTO, Match>().ReverseMap();
             CreateMap<QueuedUser, AddQueuedUserDTO>().ReverseMap();

@@ -1,29 +1,32 @@
-﻿using Amazon.DynamoDBv2.Model;
-using System.Text.Json;
+﻿
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 using CodingChallengeReal.Domains;
 using CodingChallengeReal.DTO;
 using CodingChallengeReal.Repositories.Interface;
 using CodingChallengeReal.Settings;
-using Amazon.DynamoDBv2;
 using Microsoft.Extensions.Options;
-using Amazon.DynamoDBv2.DocumentModel;
+using SystemTextJson = System.Text.Json;
+using NewtonsoftJson = Newtonsoft.Json;
+
 
 namespace CodingChallengeReal.Repositories.Implementation
 {
-    public class SolutionRepository : ISolutionRepository
+    public class ProblemSetRepository : IProblemSetRepository
     {
-        private readonly IOptions<DatabaseSettings> _databaseSettings;
         private readonly IAmazonDynamoDB _dynamoDB;
+        private readonly IOptions<DatabaseSettings> _databaseSettings;
 
-        public SolutionRepository(IAmazonDynamoDB dynamoDb,
+        public ProblemSetRepository(IAmazonDynamoDB dynamoDb,
             IOptions<DatabaseSettings> databaseSettings) {
-            this._databaseSettings = databaseSettings;
-            this._dynamoDB = dynamoDb;
+            _dynamoDB = dynamoDb;
+            _databaseSettings = databaseSettings;
         }
-        public async Task<bool> AddAsync(Solution solution)
+        public async Task<bool> AddAsync(ProblemSet question)
         {
-            var solnAsJson = JsonSerializer.Serialize(solution);
-            var itemAsDocument = Document.FromJson(solnAsJson);
+            var questionAsJson = SystemTextJson.JsonSerializer.Serialize(question);
+            var itemAsDocument = Document.FromJson(questionAsJson);
             var itemAsAttribute = itemAsDocument.ToAttributeMap();
             var createItemRequest = new PutItemRequest
             {
@@ -42,7 +45,7 @@ namespace CodingChallengeReal.Repositories.Implementation
                 TableName = _databaseSettings.Value.TableName,
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    {"pk", new AttributeValue {S = $"s#{id}"} },
+                    {"pk", new AttributeValue {S = $"q#{id}"} },
                     {"sk", new AttributeValue {S = "meta"} }
                 }
             };
@@ -50,14 +53,14 @@ namespace CodingChallengeReal.Repositories.Implementation
             return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
 
-        public async Task<SolutionDTO> GetAsync(Guid id)
+        public async Task<ProblemSetDTO> GetAsync(Guid id)
         {
             var request = new GetItemRequest
             {
                 TableName = _databaseSettings.Value.TableName,
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    {"pk", new AttributeValue {S = $"s#{id}" } },
+                    {"pk", new AttributeValue {S = $"q#{id}" } },
                     {"sk", new AttributeValue {S = "meta"} }
                 }
             };
@@ -69,13 +72,13 @@ namespace CodingChallengeReal.Repositories.Implementation
             }
 
             var itemAsDocument = Document.FromAttributeMap(response.Item);
-            return JsonSerializer.Deserialize<SolutionDTO>(itemAsDocument.ToJson());
+            return SystemTextJson.JsonSerializer.Deserialize<ProblemSetDTO>(itemAsDocument.ToJson());
         }
 
-        public async Task<bool> UpdateAsync(Guid id, Solution solution)
+        public async Task<bool> UpdateAsync(Guid id, ProblemSet question)
         {
-            solution.id = id.ToString();
-            var questionAsJson = JsonSerializer.Serialize(solution);
+            question.id = id.ToString();
+            var questionAsJson = SystemTextJson.JsonSerializer.Serialize(question);
             var itemAsDocument = Document.FromJson(questionAsJson);
             var itemAsAttribute = itemAsDocument.ToAttributeMap();
             var updateItemRequest = new PutItemRequest
@@ -87,5 +90,8 @@ namespace CodingChallengeReal.Repositories.Implementation
             var response = await _dynamoDB.PutItemAsync(updateItemRequest);
             return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
+
+
     }
+
 }

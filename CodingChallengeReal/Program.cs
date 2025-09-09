@@ -26,9 +26,9 @@ builder.Services.AddSingleton<ChatService>();
 builder.Services.Configure<DatabaseSettings>(config.GetSection(DatabaseSettings.KeyName));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
-builder.Services.AddScoped<ISolutionRepository, SolutionRepository>();
+
 builder.Services.AddScoped<IQueueRepository, QueueRepository>();
-builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IProblemSetRepository, ProblemSetRepository>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 builder.Services.AddSingleton<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient(Amazon.RegionEndpoint.USEast1));

@@ -11,19 +11,19 @@ namespace CodingChallengeReal.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class QuestionController: Controller
+    public class ProblemSetController: Controller
     {
-        private readonly IQuestionRepository _questionRepository;
+        private readonly IProblemSetRepository _questionRepository;
         private readonly IMapper _mapper;
 
-        public QuestionController(IQuestionRepository questionRepository, IMapper mapper)
+        public ProblemSetController(IProblemSetRepository questionRepository, IMapper mapper)
         {
             this._questionRepository = questionRepository;
             this._mapper = mapper;
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddQuestionAsync(AddQuestionDTO addQuestionRequest)
+        public async Task<IActionResult> AddQuestionAsync(AddProblemSetDTO addQuestionRequest)
         {
             var uid = User.FindFirst("user_id")?.Value;
             var email = User.FindFirst("email")?.Value;
@@ -31,7 +31,7 @@ namespace CodingChallengeReal.Controllers
 
             Console.WriteLine($"UID: {uid}, EMAIL: {email}, ROLE: {role}");
 
-            Question question = _mapper.Map<Question>(addQuestionRequest);
+            ProblemSet question = _mapper.Map<ProblemSet>(addQuestionRequest);
             question.id = Guid.NewGuid().ToString();
             question.sk = "meta";
             await _questionRepository.AddAsync(question);
@@ -55,31 +55,18 @@ namespace CodingChallengeReal.Controllers
             return Ok(deletedUserBool);
         }
         [HttpPut]
-        public async Task<IActionResult> UpdateQuestionAsync(Guid id, AddQuestionDTO addQuestionRequest)
+        public async Task<IActionResult> UpdateQuestionAsync(Guid id, AddProblemSetDTO addQuestionRequest)
         {
-            QuestionDTO originalQuestion = await _questionRepository.GetAsync(id);
+            ProblemSetDTO originalQuestion = await _questionRepository.GetAsync(id);
 
             if (originalQuestion == null)
             {
                 return Ok(false);
             }
-            originalQuestion.Title = addQuestionRequest.name;
-            originalQuestion.Description = addQuestionRequest.description;
-            originalQuestion.Difficulty = addQuestionRequest.difficulty;
-            var updatedUser = await _questionRepository.UpdateAsync(id, _mapper.Map<Question>(originalQuestion));
+            originalQuestion.Questions = addQuestionRequest.Questions;
+            var updatedUser = await _questionRepository.UpdateAsync(id, _mapper.Map<ProblemSet>(originalQuestion));
 
             return Ok(updatedUser);
-        }
-
-        [Authorize(Policy = "AdminOnly")]
-        [Route("AddBulk")]
-        [HttpPost]
-        public async Task<IActionResult> AddBulkQuestionsFromJson()
-        {
-            // todo
-            var result = await _questionRepository.AddQuestionsFromBulk();
-
-            return Ok(result);
         }
     }
 }
