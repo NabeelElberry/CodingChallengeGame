@@ -13,6 +13,7 @@ import DinosaurGame from "./pixijs/DinosaurGame/DinosaurGame";
 import TestPixiGame from "./pixijs/TestPixiGame";
 import DragAndDropGame from "./pixijs/DragAndDropGame/DragAndDropGame";
 import SpaceInvadersGame from "./pixijs/SpaceInvadersGame/SpaceInvadersGame";
+import { GamePage } from "./pages/GamePage/GamePage";
 
 function App() {
   const authCtx = useAuth();
@@ -47,6 +48,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SpaceInvadersGame />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/match"
+              element={
+                <ProtectedRoute>
+                  <GamePage />
                 </ProtectedRoute>
               }
             />

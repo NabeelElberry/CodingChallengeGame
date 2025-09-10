@@ -35,15 +35,17 @@ namespace CodingChallengeReal.Repositories.Implementation
             var response = await _dynamoDB.PutItemAsync(createItemRequest);
             var user1Attribute = Document.FromJson(
                                 JsonSerializer.Serialize(
-                                new UserPMatchDTO($"m#{match.id}", match.winner == 1 ? true : false, match.user2, match.problemSetId))).ToAttributeMap();
+                                new UserPMatchDTO(match.user1, $"m#{match.id}", match.winner == 1 ? true : false, match.user2, match.problemSetId))).ToAttributeMap();
 
             createItemRequest.Item = user1Attribute;
             response = await _dynamoDB.PutItemAsync(createItemRequest);
             var user2Attribute = Document.FromJson(
                     JsonSerializer.Serialize(
-                    new UserPMatchDTO($"m#{match.id}", match.winner == 1 ? false : true, match.user1, match.problemSetId))).ToAttributeMap();
-            createItemRequest.Item = user1Attribute;
+                    new UserPMatchDTO(match.user2, $"m#{match.id}", match.winner == 1 ? false : true, match.user1, match.problemSetId))).ToAttributeMap();
+            createItemRequest.Item = user2Attribute;
             response = await _dynamoDB.PutItemAsync(createItemRequest);
+            // TODO: COME BACK TO THIS AFTER FINISHING MATCH LOGIC LIKE PLAYING A MATCH AND HAVING A DEFINITIVE WINNER
+
             //var problemSetAttributes = Document.FromJson(
             //        JsonSerializer.Serialize(
             //        new ProblemSetPMatchDTO($"m#{match.id}", match.user1, match.user2, match.winner, match.problemSetId, DateTime.UtcNow.ToString())).ToAttributeMap());

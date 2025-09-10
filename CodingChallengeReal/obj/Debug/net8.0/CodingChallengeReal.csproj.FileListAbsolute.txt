@@ -54,7 +54,6 @@ C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\ne
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Microsoft.AspNetCore.SignalR.Common.dll
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Microsoft.Extensions.Features.dll
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
-C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Misc\leetcode_all_vague_rewritten_draft.json
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\questions.json
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\FirebaseAdmin.dll
 C:\Users\nabee\source\repos\CodingChallengeReal\CodingChallengeReal\bin\Debug\net8.0\Google.Api.Gax.dll

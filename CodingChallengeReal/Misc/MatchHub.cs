@@ -106,6 +106,7 @@ namespace CodingChallengeReal.Misc
             Console.WriteLine($"Script Result {scriptResult.ToString()}");
             if (scriptResultString.Equals("make_match"))
             {
+                
                 await _matchService.AddMatchAsync(new AddMatchDTO(user1, user2, 0));
                 await Clients.Group(key).SendAsync("MatchAccepted"); // send to BOTH
                 Console.WriteLine("Match accepted");

@@ -38,11 +38,13 @@ const useSignalR = () => {
       connectionR.on("MatchDeclined", () => {
         console.log("Match declined");
         matchCtx.setMatchFound(true);
+        matchCtx.setMatchStatus("DECLINED");
       });
 
       connectionR.on("MatchAccepted", () => {
         console.log("Match accepted");
         matchCtx.setMatchFound(true);
+        matchCtx.setMatchStatus("ACCEPTED");
       });
 
       connectionR.onclose((err) => {

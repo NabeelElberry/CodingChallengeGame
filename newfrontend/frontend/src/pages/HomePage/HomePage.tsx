@@ -20,6 +20,7 @@ import {
   textFlashVariant,
   variants,
 } from "../../exported_styles/styles";
+import { useNavigate } from "react-router-dom";
 
 export const HomePage = () => {
   return (
@@ -45,11 +46,13 @@ export const HomeBody = () => {
   const [queueVisible, setQueueVisible] = useState(false);
   const [matchFound, setMatchFound] = useState(false);
   const [responseState, setResponseState] = useState(false);
-  const [foundStatus, setFoundStatus] = useState(false);
+  const navigate = useNavigate();
+
   useEffect(() => {
-    console.log("in use effect: ");
-    setFoundStatus(false);
-  }, [responseState]);
+    if (matchCtx.matchStatus == "ACCEPTED") {
+      navigate("/match");
+    }
+  }, [matchCtx.matchStatus]);
 
   const updateSelectedButtons = (chosen: number) => {
     setCurrentlySelected(chosen);
@@ -173,24 +176,23 @@ export const HomeBody = () => {
   };
 
   const QueuePop = () => {
-    console.log("Queue pop in here");
-    console.log("Match found? : ", matchFound);
     // first we need to create the match in the DB through backend
-    console.log("matchData: ", matchData?.matchDto);
-    const param = matchData?.matchDto;
 
-    console.log(`USER1: ${param?.user1}, user2 ${param?.user2}`);
+    const param = matchData?.matchDto;
+    console.log(
+      "matchData: ",
+      matchData?.matchDto,
+      `USER1: ${param?.user1}, user2 ${param?.user2}`
+    );
     const sendSignal = async (confirm: boolean) => {
       if (param) {
         try {
-          connectionRef.current
-            ?.invoke("JoinMatchRoom", param.user1, param.user2, confirm)
-            .then((value) => {
-              console.log(`Value: ${value}`);
-              setFoundStatus(true);
-            });
-          setMatchFound(false);
-          matchCtx.setMatchFound(false);
+          await connectionRef.current?.invoke(
+            "JoinMatchRoom",
+            param.user1,
+            param.user2,
+            confirm
+          );
         } catch {
           console.log("Ran into an error");
         }
@@ -198,7 +200,7 @@ export const HomeBody = () => {
     };
 
     // basically queue will pop up when we find a match, and when both accept or decline the queue will leave
-    return matchFound && !matchCtx.matchFound ? (
+    return matchFound && matchCtx.matchStatus == "NONE" ? (
       <div className="absolute w-full h-full backdrop-brightness-50 z-10 flex flex-col gap-2 items-center overflow-hidden justify-center">
         <button
           onClick={() => sendSignal(true)}

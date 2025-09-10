@@ -9,8 +9,9 @@
         public string opponentId { get; set; }
         public string problemSetId { get; set; }
 
-        public UserPMatchDTO(string sk, Boolean isWinner, string opponentId, string problemSetId)
+        public UserPMatchDTO(string id, string sk, Boolean isWinner, string opponentId, string problemSetId)
         {
+            this.id = id;
             this.sk = sk;
             this.isWinner = isWinner;
             this.opponentId = opponentId;
