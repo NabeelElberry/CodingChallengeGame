@@ -28,11 +28,13 @@ namespace CodingChallengeReal.Controllers
         private readonly IMatchRepository _matchRepository;
         private readonly IProblemSetRepository _questionRepository;
         private readonly IMapper _mapper;
+        private readonly MatchManager _matchManager;
         // private readonly String Judge0URL = "http://107.23.165.87:2358";
 
 
 
-        public MatchController(IMatchRepository matchRepository, IMapper mapper, IProblemSetRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService, Matchmaker matchmaker)
+        public MatchController(IMatchRepository matchRepository, IMapper mapper, IProblemSetRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService, Matchmaker matchmaker,
+            MatchManager matchManager)
         {
             _matchService = matchService;
             _matchHub = matchHub;
@@ -41,6 +43,7 @@ namespace CodingChallengeReal.Controllers
             _questionRepository = questionRepository;
             _mapper = mapper;
             _matchmaker = matchmaker;
+            _matchManager = matchManager;
         }
 
         [HttpPost]
@@ -145,6 +148,26 @@ namespace CodingChallengeReal.Controllers
             return Ok("Check console output.");
         }
 
+        /// <summary>
+        /// This endpoint gets the partner of the UID given, goes through redis hash "match_pairs" and retrieves the partner
+        /// if they exist
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        [HttpGet("/getMatchInfoForPlayer")]
+        public async Task<IActionResult> GetMatchInfo([FromQuery] string uid)
+        {
+            var hashEntries = await _matchManager.GetMatchInfoForPlayer(uid);
+            Dictionary<String, String> values = new Dictionary<String, String>();
+            foreach (var entry in hashEntries)
+            {
+                values.Add(entry.Name, entry.Value);
+                Console.WriteLine($"name: {entry.Name} value: {entry.Value}");
+            }
+
+
+           return Ok(values);
+        }
 
     }
 }

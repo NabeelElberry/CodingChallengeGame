@@ -27,6 +27,22 @@
   },
   {
     "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "GetMatchInfo",
+    "RelativePath": "getMatchInfoForPlayer",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "uid",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
     "Method": "AddMatchAsync",
     "RelativePath": "Match",
     "HttpMethod": "POST",

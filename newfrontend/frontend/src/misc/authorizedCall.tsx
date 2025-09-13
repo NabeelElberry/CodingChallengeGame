@@ -15,6 +15,7 @@ const authorizedCall = async (
   try {
     if (requestType == "GET") {
       response = await axios.get(`${authCtx.API_URL}/${endpoint}`, {
+        params: dataToSend,
         headers: {
           Authorization: `Bearer ${token}`,
         },

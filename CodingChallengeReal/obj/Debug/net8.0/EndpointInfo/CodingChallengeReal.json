@@ -217,6 +217,27 @@
         }
       }
     },
+    "/getMatchInfoForPlayer": {
+      "get": {
+        "tags": [
+          "Match"
+        ],
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/ProblemSet": {
       "post": {
         "tags": [

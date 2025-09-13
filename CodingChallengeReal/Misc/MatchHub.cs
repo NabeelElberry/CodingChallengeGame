@@ -1,6 +1,7 @@
 ﻿using CodingChallengeReal.Domains;
 using CodingChallengeReal.DTO;
 using CodingChallengeReal.Repositories.Interface;
+using CodingChallengeReal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
@@ -14,12 +15,13 @@ namespace CodingChallengeReal.Misc
         private readonly IMatchRepository _matchRepository;
         private readonly IDatabase _redis;
         private readonly IMatchService _matchService;
-
+        private readonly MatchManager _matchManager;
         static string Key(string u1, string u2) => string.CompareOrdinal(u1, u2) < 0 ? $"{u1}:{u2}" : $"{u2}:{u1}";
-        public MatchHub(IMatchRepository matchRepository, IConnectionMultiplexer redisConnection, IMatchService matchService) {
+        public MatchHub(IMatchRepository matchRepository, IConnectionMultiplexer redisConnection, IMatchService matchService, MatchManager matchManager) {
             _matchRepository = matchRepository;
             _redis = redisConnection.GetDatabase();
             _matchService = matchService;
+            _matchManager = matchManager;
         }
 
 
@@ -27,7 +29,7 @@ namespace CodingChallengeReal.Misc
         {
             await base.OnConnectedAsync();
 
-            Console.WriteLine($"Client connected: {Context.ConnectionId}");
+            Console.WriteLine($"Client connected: ✅");
 
             foreach (var claims in Context.User.Claims)
             {
@@ -42,7 +44,7 @@ namespace CodingChallengeReal.Misc
         local key = KEYS[1]
         -- whether or not the user declined
         local accepted = ARGV[1]    
-        local getKey = tonumber(redis.call('GET', key))
+        local getKey = tonumber(redis.call('HGET', key, 'init'))
 
     
         -- case where someone else before you declined
@@ -55,13 +57,15 @@ namespace CodingChallengeReal.Misc
             if getKey == 1 then
                 return 'accepted_declined'
             else 
-                redis.call('SET', key, -10)
+                redis.call('HSET', key, 'init', -10)
                 return 'declined_first'
             end
             
         else
+            
             if getKey == 2 then
-                redis.call('DECR', key)
+                -- decrements by 1
+                redis.call('HINCRBY', key, 'init', -1)
                 return 'first_accepted'
             elseif getKey == 1 then
                 return 'make_match'
@@ -85,14 +89,12 @@ namespace CodingChallengeReal.Misc
             var key = Key(user1, user2);
             await Groups.AddToGroupAsync(Context.ConnectionId, key);
             // should only be created once per match
-            if (await _redis.StringGetAsync(key) == RedisValue.Null)
+            if (await _redis.HashGetAsync(key, "init") == RedisValue.Null)
             {
-                await _redis.StringSetAsync(key, 2);
+                await _redis.HashSetAsync(key, "init", 2);
 
             }
     
-            
-
             
             // 5 cases, returning make_match, first_accepted, declined, declined early
             // if make_match, both have accepted, should actually make the match in the DB,
@@ -109,6 +111,7 @@ namespace CodingChallengeReal.Misc
                 
                 await _matchService.AddMatchAsync(new AddMatchDTO(user1, user2, 0));
                 await Clients.Group(key).SendAsync("MatchAccepted"); // send to BOTH
+                await _matchManager.CreateGameManager(key, user1, user2);
                 Console.WriteLine("Match accepted");
             } else if (scriptResultString.Equals("declined"))
             {
@@ -125,6 +128,21 @@ namespace CodingChallengeReal.Misc
             }
         }
 
+
+        // lowkey we could organize this better,
+        // having a hash where each key is a table in the hash would reduce the clutter in the main part of redis
+
+
+        /// <summary>
+        /// Essentially what this does is it adds a key into the redis table with user1:user2 and a value that goes up to 2
+        /// However, once this is done we really should delete it since there's no point,
+        /// 
+        /// </summary>
+        /// <param name="matchId"></param>
+        /// <param name="user1id"></param>
+        /// <param name="user2id"></param>
+        /// <param name="response"></param>
+        /// <returns></returns>
         public async Task AcceptOrDecline(string matchId, string user1id, string user2id, bool response)
         {
             Console.WriteLine("In accept/decline");
@@ -137,7 +155,7 @@ namespace CodingChallengeReal.Misc
             // if it's our first acceptance or decline, initialize the key to 2
             if (keyValue == RedisValue.Null)
             {
-                await _redis.StringSetAsync(Key(user1id, user2id), 2);
+                await _redis.HashSetAsync(Key(user1id, user2id), "init", 2);
             }
 
             if (keyValue.IsInteger && amount == -10) // opponent declined already (not you)
@@ -148,7 +166,7 @@ namespace CodingChallengeReal.Misc
 
             if (response) // accepted just decrement the key
             {
-                await _redis.StringDecrementAsync(key);
+                await _redis.HashDecrementAsync(key, "init");
             } else // declined, set the value into the negatives
             {
                 
@@ -158,14 +176,14 @@ namespace CodingChallengeReal.Misc
                 }
                 else
                 {
-                    await _redis.StringSetAsync(key, -10);
+                    await _redis.HashSetAsync(key, "init", -10);
                     await Clients.Caller.SendAsync("MatchDeclined");
                 }
             }
 
             // case where we should make the match
             // communicate with the DB, and communicate with players that match has been accepted
-            if (await _redis.StringGetAsync(key) == 0)
+            if (await _redis.HashGetAsync(key, "init") == 0)
             {
                 await Clients.Group(matchId).SendAsync("MatchAccepted");
             }

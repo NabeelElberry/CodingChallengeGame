@@ -46,6 +46,7 @@ export const HomeBody = () => {
   const [queueVisible, setQueueVisible] = useState(false);
   const [matchFound, setMatchFound] = useState(false);
   const [responseState, setResponseState] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -193,8 +194,8 @@ export const HomeBody = () => {
             param.user2,
             confirm
           );
-        } catch {
-          console.log("Ran into an error");
+        } catch (e) {
+          console.log(`Ran into an error ${e}`);
         }
       }
     };

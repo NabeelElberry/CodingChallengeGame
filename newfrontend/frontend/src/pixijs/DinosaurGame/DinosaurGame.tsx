@@ -10,19 +10,28 @@ import {
 } from "pixi.js";
 
 import { BunnySprite } from "../BunnySprite";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type SetStateAction,
+  type Dispatch,
+} from "react";
 import { checkForAABB } from "../Utils/pixiutils";
 import type { xyInterface } from "../Utils/interfaces";
 import { JsonInput } from "@mantine/core";
 
 extend({ Container, Graphics, Sprite });
 
-const treeSpeed = 0.5;
 export default function DinosaurGame() {
-  return (
+  const [gameWon, setGameWon] = useState(false);
+
+  return gameWon ? (
+    <div>Game Won</div>
+  ) : (
     <div className="w-[800px] h-[400px]">
       <Application width={800} height={400} backgroundColor={"#ffffff"}>
-        <PixiContainer />
+        <PixiContainer gameWonFunction={setGameWon} />
       </Application>
     </div>
   );
@@ -49,7 +58,11 @@ const Player = ({ x, y, width, height, ref }: xyInterface) => {
   );
 };
 
-const PixiContainer = () => {
+interface gameWonInterface {
+  gameWonFunction: Dispatch<SetStateAction<boolean>>;
+}
+
+const PixiContainer = ({ gameWonFunction }: gameWonInterface) => {
   const treeRefs = [
     useRef<Sprite>(null),
     useRef<Sprite>(null),
@@ -110,6 +123,12 @@ const PixiContainer = () => {
         setPlayerJumping(false);
         playerRef.current.y = gameY;
       }
+
+      treeRefs.forEach((treeRef) => {
+        if (checkForAABB(playerRef, treeRef.current)) {
+          gameWonFunction(true);
+        }
+      });
     }
   });
   const keysDown = (e: KeyboardEvent) => {
