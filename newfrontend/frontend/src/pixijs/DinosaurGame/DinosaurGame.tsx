@@ -18,14 +18,16 @@ import {
   type Dispatch,
 } from "react";
 import { checkForAABB } from "../Utils/pixiutils";
-import type { xyInterface } from "../Utils/interfaces";
+import type {
+  gameState,
+  gameWonInterface,
+  xyInterface,
+} from "../Utils/interfaces";
 import { JsonInput } from "@mantine/core";
 
 extend({ Container, Graphics, Sprite });
 
-export default function DinosaurGame() {
-  const [gameWon, setGameWon] = useState(false);
-
+export default function DinosaurGame({ gameWon, setGameWon }: gameState) {
   return gameWon ? (
     <div>Game Won</div>
   ) : (
@@ -57,10 +59,6 @@ const Player = ({ x, y, width, height, ref }: xyInterface) => {
     />
   );
 };
-
-interface gameWonInterface {
-  gameWonFunction: Dispatch<SetStateAction<boolean>>;
-}
 
 const PixiContainer = ({ gameWonFunction }: gameWonInterface) => {
   const treeRefs = [
@@ -125,7 +123,11 @@ const PixiContainer = ({ gameWonFunction }: gameWonInterface) => {
       }
 
       treeRefs.forEach((treeRef) => {
-        if (checkForAABB(playerRef, treeRef.current)) {
+        if (
+          playerRef.current &&
+          treeRef.current &&
+          checkForAABB(playerRef.current, treeRef.current)
+        ) {
           gameWonFunction(true);
         }
       });

@@ -18,6 +18,7 @@ import { GamePage } from "./pages/GamePage/GamePage";
 function App() {
   const authCtx = useAuth();
   const [loading, setLoading] = useState(true);
+  const [gameWon, setGameWon] = useState(false);
   // refreshes the user token on refresh
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -47,7 +48,7 @@ function App() {
               path="/test"
               element={
                 <ProtectedRoute>
-                  <SpaceInvadersGame />
+                  <DinosaurGame gameWon={gameWon} setGameWon={setGameWon} />
                 </ProtectedRoute>
               }
             />
