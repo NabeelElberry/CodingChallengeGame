@@ -1,6 +1,6 @@
 export const retrieveGameOrder = (
   answerOrder: string,
-  currentStageOfPlayer: number,
+  currentStage: number,
   minigameOrder: string,
   currentMinigameNumber: string
 ) => {
@@ -13,8 +13,8 @@ export const retrieveGameOrder = (
   // and then update it to redis
 
   let x = 0;
-  while (x < currentStageOfPlayer && minigameOrder != null) {
-    if (minigameOrder[x] == minigameOrder[currentStageOfPlayer]) {
+  while (x < currentStage && minigameOrder != null) {
+    if (minigameOrder[x] == minigameOrder[currentStage]) {
       gameOrderToGet += 1;
     }
     x++;
