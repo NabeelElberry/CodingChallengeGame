@@ -1,66 +1,78 @@
 import { Application, extend, useApplication, useTick } from "@pixi/react";
-
+import { Container, Graphics, Sprite, Assets, Texture, Text } from "pixi.js";
+import { useEffect, useRef, useState } from "react";
 import {
-  Container,
-  Graphics,
-  Rectangle,
-  Sprite,
-  Assets,
-  Texture,
-} from "pixi.js";
-
-import { BunnySprite } from "../BunnySprite";
-import { createRef, useEffect, useRef, useState, type RefObject } from "react";
-import { checkForAABB, checkForAABBNoObject } from "../Utils/pixiutils";
-import type { xyInterface } from "../Utils/interfaces";
-import { JsonInput } from "@mantine/core";
+  answerToNumber,
+  checkForAABBNoObject,
+  generateAnswerChoice,
+} from "../Utils/pixiutils";
+import type { gameWonInterface, xyInterface } from "../Utils/interfaces";
 
 extend({ Container, Graphics, Sprite });
-export default function SpaceInvadersGame() {
+
+export default function SpaceInvadersGame({
+  setGameWon,
+  gameStatus,
+  gameInformation,
+  answerOrder,
+}: gameWonInterface) {
   return (
     <div className="w-[800px] h-[400px]">
       <Application width={800} height={800} backgroundColor={"#ffffff"}>
-        <PixiContainer />
+        <PixiContainer
+          setGameWon={setGameWon}
+          gameStatus={gameStatus}
+          gameInformation={gameInformation}
+          answerOrder={answerOrder}
+        />
       </Application>
     </div>
   );
 }
 
-const PixiContainer = () => {
+const PixiContainer = ({
+  setGameWon,
+  gameStatus,
+  gameInformation,
+  answerOrder,
+}: gameWonInterface) => {
   const containerRef = useRef<Container>(null);
   const playerRef = useRef<Sprite>(null);
 
-  // const bulletsRef = useRef<{ sprite: Sprite; active: boolean }[]>([]);
-  let bulletsArray: { sprite: Sprite; active: boolean }[] = [];
+  // keep bullets in a stable ref
+  const bulletsRef = useRef<{ sprite: Sprite; active: boolean }[]>([]);
   const enemyBulletArray = useRef<{ sprite: Sprite; active: boolean }[]>([]);
-  // const enemyBulletsRef = useRef<{ sprite: Sprite }[]>([]);
+  const enemyRefArray = useRef<
+    { sprite: Container; active: boolean; letter: string }[]
+  >([]);
+
+  // handling text over the birds
+
   const [bulletTexture, setBulletTexture] = useState(Texture.EMPTY);
   const [enemyTexture, setEnemyTexture] = useState(Texture.EMPTY);
+
   const spaceshipDimensions = { width: 50, height: 50 };
   const bulletDimensions = { width: 30, height: 30 };
   const enemyDimensions = { width: 50, height: 50 };
-  const enemyHit = [
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-  ];
 
-  const enemyFireTimes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  const enemyFireTimeCooldownMS = 1000; // 1 second
-  const playerFireTimeCooldownMS = 500; // half a second
+  const totalEnemies = 12;
+  let correctAnswerEnemiesKilled = 0;
+  const correctEnemiesTotal = useRef(0);
+  const enemyHit = Array(totalEnemies).fill(false);
+  const enemyFireTimes = Array(totalEnemies).fill(0);
+  const enemyFireTimeCooldownMS = 1000;
+  const playerFireTimeCooldownMS = 500;
   const playerFireTimes: number[] = [];
-  const enemyRefArray = useRef<{ sprite: Sprite; active: boolean }[]>([]);
-  const refArray = useRef([false, false, false, false]); // 0 = W, 1 = A, 2 = S, 3 = D
+  const bulletVelocity = 10;
+
+  const refArray = useRef([false, false, false, false]); // W A S D
   const { app } = useApplication();
 
+  const [texturesLoaded, setTexturesLoaded] = useState(false);
+  let totalEnemiesKilled = 0;
+
   useEffect(() => {
+    console.log("game information", gameInformation);
     if (bulletTexture === Texture.EMPTY) {
       Assets.load("/src/assets/shot.png").then((result) =>
         setBulletTexture(result)
@@ -71,144 +83,138 @@ const PixiContainer = () => {
         setEnemyTexture(result)
       );
     }
-  }, [bulletTexture, enemyTexture]);
+    setTexturesLoaded(true);
 
-  // enemy array logic
-  useEffect(() => {
-    // reset enemies each time textures load
-    // this code is for strict mode
     enemyRefArray.current.forEach(({ sprite }) => {
       containerRef.current?.removeChild(sprite);
     });
-    enemyRefArray.current = []; // fully clear the array
+    enemyRefArray.current = [];
+
     if (!bulletTexture || !enemyTexture) return;
+
     enemyHit.forEach((_, index) => {
+      const container = new Container();
       const sprite = Sprite.from(enemyTexture);
+      const chosenLetter = answerOrder[index];
+      const text = new Text({ text: chosenLetter });
+      container.width = enemyDimensions.width;
+      container.height = enemyDimensions.height;
+      container.x = (index % (totalEnemies / 2)) * 100 + 50;
+      container.y = index > totalEnemies / 2 - 1 ? 80 : 20;
+
+      console.log(
+        `Chosen Letter: ${answerToNumber(chosenLetter)}, correct answer: ${
+          gameInformation.correctAnswer
+        }`
+      );
+      if (answerToNumber(chosenLetter) === gameInformation.correctAnswer) {
+        console.log("Add to it");
+        correctEnemiesTotal.current += 1;
+      }
+      // console.log(`Index: ${index}, X: ${container.x}, y: ${container.y}`);
+
       sprite.width = enemyDimensions.width;
       sprite.height = enemyDimensions.height;
-      sprite.x = (index % 5) * 150 + 50; // two rows
-      sprite.y = index > 4 ? 80 : 20; // two rows
-      enemyRefArray.current.push({ sprite: sprite, active: true });
-      containerRef.current?.addChild(sprite);
+
+      text.width = enemyDimensions.width;
+      text.height = enemyDimensions.height;
+
+      container.addChild(sprite);
+      container.addChild(text);
+
+      enemyRefArray.current.push({
+        sprite: container,
+        active: true,
+        letter: answerOrder[index],
+      });
+      containerRef.current?.addChild(container);
     });
+  }, []);
 
-    return () => {
-      bulletsArray = [];
-      window.removeEventListener("keyup", keysUp);
-      window.removeEventListener("keydown", keysDown);
-    };
-  }, [bulletTexture, enemyTexture]);
+  // FIX 2: proper event listener registration/cleanup
+  useEffect(() => {
+    const keysDown = (e: KeyboardEvent) => {
+      if (e.key === "a") refArray.current[1] = true;
+      if (e.key === "d") refArray.current[3] = true;
+      if (e.key === "s") refArray.current[2] = true;
+      if (e.key === "w") refArray.current[0] = true;
 
-  const keysUp = (e: KeyboardEvent) => {
-    if (e.key == "a") {
-      console.log("A released");
-      refArray.current[1] = false;
-    }
-    if (e.key == "d") {
-      console.log("D released");
-      refArray.current[3] = false;
-    }
-    if (e.key == "s") {
-      console.log("S released");
-      refArray.current[2] = false;
-    }
-    if (e.key == "w") {
-      console.log("W released");
-      refArray.current[0] = false;
-    }
-  };
-  const keysDown = (e: KeyboardEvent) => {
-    if (e.key == "a") {
-      console.log("A pressed");
-      refArray.current[1] = true;
-    }
-    if (e.key == "d") {
-      console.log("D pressed");
-      refArray.current[3] = true;
-    }
-    if (e.key == "s") {
-      console.log("S pressed");
-      refArray.current[2] = true;
-    }
-    if (e.key == "w") {
-      console.log("W pressed");
-      refArray.current[0] = true;
-    }
-
-    if (e.key == " " && playerRef.current) {
-      if (
-        // cooldown for shooting
-        playerFireTimes.length == 0 ||
-        performance.now() - playerFireTimes[playerFireTimes.length - 1] >=
-          playerFireTimeCooldownMS
-      ) {
-        console.log("Adding bullet");
-        const bullet = Sprite.from(bulletTexture);
-        bullet.x = playerRef.current!.x + 10;
-        bullet.y = playerRef.current!.y - 20;
-        bullet.width = bulletDimensions.width;
-        bullet.height = bulletDimensions.height;
-        containerRef.current?.addChild(bullet);
-        bulletsArray.push({
-          sprite: bullet,
-          active: true,
-        });
-        playerFireTimes.push(performance.now());
-      }
-    }
-  };
-
-  let birdXVelocity = 0.5;
-  const bulletVelocity = 10;
-  useTick((time) => {
-    const dt = time.deltaTime;
-
-    const velocity = dt * 5;
-    // controls for player
-
-    refArray.current.forEach((keyPressedBool, index) => {
-      if (playerRef.current?.destroyed) return;
-      if (keyPressedBool && playerRef.current) {
-        const currX = playerRef.current.x;
-        const currY = playerRef.current.y;
-        if (index == 0 && currY > 0) {
-          playerRef.current.y -= velocity;
-        } else if (index == 1 && currX > 0) {
-          playerRef.current.x -= velocity;
-        } else if (index == 2 && currY < app.canvas.height) {
-          playerRef.current.y += velocity;
-        } else if (index == 3 && currX < app.canvas.width) {
-          playerRef.current.x += velocity;
+      if (e.key === " " && playerRef.current) {
+        if (
+          playerFireTimes.length === 0 ||
+          performance.now() - playerFireTimes[playerFireTimes.length - 1] >=
+            playerFireTimeCooldownMS
+        ) {
+          const bullet = Sprite.from(bulletTexture);
+          bullet.x = playerRef.current!.x + 10;
+          bullet.y = playerRef.current!.y - 20;
+          bullet.width = bulletDimensions.width;
+          bullet.height = bulletDimensions.height;
+          containerRef.current?.addChild(bullet);
+          bulletsRef.current.push({ sprite: bullet, active: true });
+          playerFireTimes.push(performance.now());
         }
       }
+    };
+
+    const keysUp = (e: KeyboardEvent) => {
+      if (e.key === "a") refArray.current[1] = false;
+      if (e.key === "d") refArray.current[3] = false;
+      if (e.key === "s") refArray.current[2] = false;
+      if (e.key === "w") refArray.current[0] = false;
+    };
+
+    window.addEventListener("keydown", keysDown);
+    window.addEventListener("keyup", keysUp);
+
+    return () => {
+      window.removeEventListener("keydown", keysDown);
+      window.removeEventListener("keyup", keysUp);
+    };
+  }, [bulletTexture]);
+
+  let birdXVelocity = 0.5;
+
+  useTick((time) => {
+    const dt = time.deltaTime;
+    const velocity = dt * 5;
+
+    // game won condition
+    if (
+      correctAnswerEnemiesKilled == correctEnemiesTotal.current &&
+      correctAnswerEnemiesKilled != 0
+    ) {
+      console.log("Game won");
+      setGameWon();
+    }
+
+    // Player movement
+    refArray.current.forEach((pressed, index) => {
+      if (!pressed || !playerRef.current || playerRef.current.destroyed) return;
+      const currX = playerRef.current.x;
+      const currY = playerRef.current.y;
+      if (index === 0 && currY > 0) playerRef.current.y -= velocity;
+      if (index === 1 && currX > 0) playerRef.current.x -= velocity;
+      if (index === 2 && currY < app.canvas.height)
+        playerRef.current.y += velocity;
+      if (index === 3 && currX < app.canvas.width)
+        playerRef.current.x += velocity;
     });
 
-    // collision logic
-    bulletsArray.forEach((bullet, indexBullet) => {
-      bullet.sprite.y -= dt * bulletVelocity; // bullet movement
-
-      console.log;
+    // Bullets update
+    bulletsRef.current.forEach((bullet) => {
+      if (!bullet.active) return;
+      bullet.sprite.y -= dt * bulletVelocity;
       if (bullet.sprite.y < -50) {
-        // goes offscreen remove it
         containerRef.current?.removeChild(bullet.sprite);
         bullet.active = false;
-        // bulletsArray.splice(indexBullet, 1);
       }
-
-      for (
-        let indexEnemy = 0;
-        indexEnemy < enemyRefArray.current.length;
-        indexEnemy++
-      ) {
-        const enemy = enemyRefArray.current[indexEnemy];
+      enemyRefArray.current.forEach((enemy, indexEnemy) => {
         if (
           checkForAABBNoObject(
             { x: bullet.sprite.x, y: bullet.sprite.y },
             bulletDimensions,
-            {
-              x: enemy.sprite.x,
-              y: enemy.sprite.y,
-            },
+            { x: enemy.sprite.x, y: enemy.sprite.y },
             enemyDimensions
           ) &&
           enemy.active &&
@@ -216,100 +222,86 @@ const PixiContainer = () => {
         ) {
           containerRef.current?.removeChild(bullet.sprite);
           containerRef.current?.removeChild(enemy.sprite);
-          console.log(`Hit bird ${indexEnemy}`);
           enemyHit[indexEnemy] = true;
           enemy.active = false;
-          bulletsArray[indexBullet].active = false;
-          // bulletsArray.splice(indexBullet, 1);
-          break;
+          bullet.active = false;
+          if (answerToNumber(enemy.letter) == gameInformation.correctAnswer) {
+            correctAnswerEnemiesKilled += 1;
+            console.log("Correct enemy hit");
+            console.log(
+              `Total numbers of enemies killed: ${correctAnswerEnemiesKilled}, total correct enemies: ${correctEnemiesTotal.current}`
+            );
+          }
+          totalEnemiesKilled++;
         }
-      }
+      });
     });
 
-    let minX = Infinity;
-    let maxX = -Infinity;
+    // if (totalEnemiesKilled === totalEnemies) {
+    //   if (!gameStatus) setGameWon();
+    // }
 
+    // Enemy bullets
     enemyBulletArray.current.forEach((item) => {
       const bullet = item.sprite;
       bullet.y += dt * bulletVelocity;
-      if (playerRef.current?.destroyed) return;
-
-      if (
-        checkForAABBNoObject(
-          { x: bullet.x, y: bullet.y },
-          bulletDimensions,
-          { x: playerRef.current!.x, y: playerRef.current!.y },
-          { width: playerRef.current!.width, height: playerRef.current!.height }
-        )
-      ) {
-        console.log("Player hit!");
-        playerRef.current?.destroy();
-        return;
-      }
+      // if (
+      //   playerRef.current &&
+      //   checkForAABBNoObject(
+      //     { x: bullet.x, y: bullet.y },
+      //     bulletDimensions,
+      //     { x: playerRef.current.x, y: playerRef.current.y },
+      //     {
+      //       width: playerRef.current.width,
+      //       height: playerRef.current.height,
+      //     }
+      //   )
+      // ) {
+      //   playerRef.current?.destroy();
+      //   if (!gameStatus) setGameWon();
+      // }
     });
 
-    // want a enemy to shoot if there's nothing under them
-    // check first row, add 5 to the current index and see if it's active, if not then shoot
-    // top row includes up to index 4
-    // bottom row includes up to index 9
-    // 10 enemies total, so we're going to need to check from range 0-4, which is the max number that is listed false and min
-    // then the max and min of the second row, then min and max each of those values
+    // Enemy movement + shooting
+    let minX = Infinity;
+    let maxX = -Infinity;
+
     enemyRefArray.current.forEach((enemy, index) => {
       if (enemy.active) {
         const currTime = performance.now();
-        if (index >= 5) {
-          if (
-            enemyFireTimes[index] == 0 ||
-            currTime - enemyFireTimes[index] >= enemyFireTimeCooldownMS
-          ) {
-            // bottom row shooting
-            const sprite = Sprite.from(bulletTexture);
-            sprite.width = bulletDimensions.width;
-            sprite.height = bulletDimensions.height;
-            sprite.x = enemy.sprite.x; // two rows
-            sprite.y = enemy.sprite.y; // two rows
-            enemyBulletArray.current.push({ sprite: sprite, active: true });
-            containerRef.current?.addChild(sprite);
 
-            enemyFireTimes[index] =
-              performance.now() + (Math.random() * 6 - 2) * 1000;
-            return;
-          }
+        // prevent top row from shooting as long as an enemy is under it
+        if (
+          (index >= totalEnemies / 2 ||
+            (index <= totalEnemies / 2 &&
+              !enemyRefArray.current[index + totalEnemies / 2].active)) &&
+          (enemyFireTimes[index] === 0 ||
+            currTime - enemyFireTimes[index] >= enemyFireTimeCooldownMS)
+        ) {
+          const sprite = Sprite.from(bulletTexture);
+          sprite.width = bulletDimensions.width;
+          sprite.height = bulletDimensions.height;
+          sprite.x = enemy.sprite.x;
+          sprite.y = enemy.sprite.y;
+          enemyBulletArray.current.push({ sprite, active: true });
+          containerRef.current?.addChild(sprite);
+          enemyFireTimes[index] = performance.now();
         }
-        if (index <= 4 && enemyRefArray.current[index + 5].active == false) {
-          if (
-            enemyFireTimes[index] == 0 ||
-            currTime - enemyFireTimes[index] >= enemyFireTimeCooldownMS
-          ) {
-            const sprite = Sprite.from(bulletTexture);
-            sprite.width = bulletDimensions.width;
-            sprite.height = bulletDimensions.height;
-            sprite.x = enemy.sprite.x; // two rows
-            sprite.y = enemy.sprite.y; // two rows
-            enemyBulletArray.current.push({ sprite: sprite, active: true });
-            containerRef.current?.addChild(sprite);
 
-            enemyFireTimes[index] = performance.now();
-            return;
-          }
-        }
+        // dynamically adjust bounds
+        if (enemy.sprite.x < minX) minX = enemy.sprite.x;
+        if (enemy.sprite.x > maxX) maxX = enemy.sprite.x;
       }
-
-      if (enemy.sprite.x < minX) minX = enemy.sprite.x;
-      if (enemy.sprite.x > maxX) maxX = enemy.sprite.x;
     });
 
     if (maxX >= app.screen.width - enemyDimensions.width || minX <= 0) {
       birdXVelocity *= -1;
     }
-
     enemyRefArray.current.forEach((enemy) => {
       enemy.sprite.x += birdXVelocity;
     });
   });
 
-  window.addEventListener("keyup", keysUp);
-  window.addEventListener("keydown", keysDown);
   return (
     <pixiContainer ref={containerRef}>
       <Spaceship
@@ -339,35 +331,6 @@ const Spaceship = ({ x, y, width, height, ref }: xyInterface) => {
       texture={texture}
       width={width}
       height={height}
-      x={x}
-      y={y}
-      ref={ref}
-    />
-  );
-};
-
-interface EnemyInterface {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  ref: RefObject<Sprite | null>;
-  leftAnchor?: boolean;
-}
-
-const Enemy = ({ x, y, width, height, ref, leftAnchor }: EnemyInterface) => {
-  const [texture, setTexture] = useState(Texture.EMPTY);
-  useEffect(() => {
-    if (texture === Texture.EMPTY) {
-      Assets.load("/src/assets/bird.png").then((result) => setTexture(result));
-    }
-  }, [texture]);
-
-  return (
-    <pixiSprite
-      texture={texture}
-      width={40}
-      height={30}
       x={x}
       y={y}
       ref={ref}

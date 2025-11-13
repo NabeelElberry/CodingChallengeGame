@@ -97,6 +97,8 @@ namespace CodingChallengeReal.Controllers
             [FromQuery] string mode)
         {
 
+
+            // COME BACK TO THIS
             if (mode == "casual") // casual mode doesn't need hard searching, slam everyone into the same redis queue and search from there
             {
                 var redis_queue = "queue";
@@ -113,7 +115,7 @@ namespace CodingChallengeReal.Controllers
                     if (result?.Opponent != null && result.IsInitiator) // only one match will be made depending on who the "initiator" was.
                     {
                         AddMatchDTO matchDto = new AddMatchDTO(userId, result.Opponent, null);
-                        //var match = await _matchService.AddMatchAsync(matchDto); // makes a match in DB
+
 
                         await _matchHub.Clients.User(userId).SendAsync("MatchFound");
                         await _matchHub.Clients.User(result.Opponent.Value).SendAsync("MatchFound");
@@ -155,9 +157,9 @@ namespace CodingChallengeReal.Controllers
         /// <param name="uid"></param>
         /// <returns></returns>
         [HttpGet("/getMatchInfoForPlayer")]
-        public async Task<IActionResult> GetMatchInfo([FromQuery] string uid)
+        public async Task<IActionResult> GetMatchInfo([FromQuery] string uid, [FromQuery] Guid problemSetId)
         {
-            var hashEntries = await _matchManager.GetMatchInfoForPlayer(uid);
+            var hashEntries = await _matchManager.GetMatchInfoForPlayer(uid, problemSetId);
             Dictionary<String, String> values = new Dictionary<String, String>();
             foreach (var entry in hashEntries)
             {
@@ -169,6 +171,17 @@ namespace CodingChallengeReal.Controllers
            return Ok(values);
         }
 
+        [HttpPost("/editPlayerLevel")]
+        public async Task<IActionResult> EditPlayerLevel([FromQuery] string uid, [FromQuery] int newLevel)
+        {
+            return Ok(await _matchManager.EditLevelManager(uid, newLevel));
+        }
+
+        [HttpPost("/editPlayerTime")]
+        public async Task<IActionResult> EditPlayerTime([FromQuery] string uid, [FromQuery] int newTime)
+        {
+            return Ok(await _matchManager.EditTimeManager(uid, newTime));
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 import type { Sprite } from "pixi.js";
-import type { Dispatch, RefObject, SetStateAction } from "react";
+import type { RefObject } from "react";
 
 export interface xyInterface {
   x: number;
@@ -10,10 +10,14 @@ export interface xyInterface {
 }
 
 export interface gameWonInterface {
-  gameWonFunction: Dispatch<SetStateAction<boolean>>;
+  setGameWon: () => void;
+  gameStatus: boolean;
+  gameInformation: Question;
+  answerOrder: string;
 }
 
-export interface gameState {
-  gameWon: boolean;
-  setGameWon: Dispatch<SetStateAction<boolean>>;
+export interface Question {
+  correctAnswer: number;
+  answerChoices: string[];
+  questionText: string;
 }

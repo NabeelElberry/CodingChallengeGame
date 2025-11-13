@@ -27,6 +27,48 @@
   },
   {
     "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "EditPlayerLevel",
+    "RelativePath": "editPlayerLevel",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "uid",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "newLevel",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "EditPlayerTime",
+    "RelativePath": "editPlayerTime",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "uid",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "newTime",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
     "Method": "GetMatchInfo",
     "RelativePath": "getMatchInfoForPlayer",
     "HttpMethod": "GET",
@@ -36,6 +78,32 @@
       {
         "Name": "uid",
         "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "problemSetId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.ProblemSetController",
+    "Method": "GetQuestionInformationByProblemSetIDAndQuestionNumber",
+    "RelativePath": "getQuestionByIdAndQuestionNumber",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "questionNumber",
+        "Type": "System.Int32",
         "IsRequired": false
       }
     ],

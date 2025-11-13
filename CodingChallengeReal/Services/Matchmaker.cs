@@ -59,6 +59,7 @@ namespace CodingChallengeReal.Services
             redis.call('HSET', matchHash, me, opp, opp, me)
             -- Ensure opp not lingering in queue
             redis.call('LREM', queueKey, 0, opp)
+            redis.call('SADD', 'initiators', me) -- adding myself to a set of initiators
             return { 'initiator', opp }
           else
             -- Put them back if they were busy/paired

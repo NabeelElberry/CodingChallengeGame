@@ -9,5 +9,6 @@ namespace CodingChallengeReal.Repositories.Interface
         public Task<bool> AddAsync(ProblemSet question);
         public Task<bool> DeleteAsync(Guid id);
         public Task<bool> UpdateAsync(Guid id, ProblemSet question);
+
     }
 }

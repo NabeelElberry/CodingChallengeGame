@@ -75,7 +75,7 @@ namespace CodingChallengeReal.Misc
         ";
 
 
-        public async Task JoinMatchRoom(string user1, string user2, bool accepted)
+        public async Task JoinMatchRoom(string user1, string user2, bool accepted, Guid problemSetId)
         {
             Console.WriteLine("In Join Match Room");
             var userId = Context.User?.FindFirst("user_id").Value;
@@ -108,10 +108,10 @@ namespace CodingChallengeReal.Misc
             Console.WriteLine($"Script Result {scriptResult.ToString()}");
             if (scriptResultString.Equals("make_match"))
             {
-                
+                Console.WriteLine("Both accepted!!!!!!!!!!!!!!!!!!!");
                 await _matchService.AddMatchAsync(new AddMatchDTO(user1, user2, 0));
                 await Clients.Group(key).SendAsync("MatchAccepted"); // send to BOTH
-                await _matchManager.CreateGameManager(key, user1, user2);
+                await _matchManager.CreateGameManager(key, user1, user2, problemSetId);
                 Console.WriteLine("Match accepted");
             } else if (scriptResultString.Equals("declined"))
             {

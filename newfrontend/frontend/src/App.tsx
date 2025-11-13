@@ -10,7 +10,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./config/firebase";
 import { TestPage } from "./pages/TestPage/TestPage";
 import DinosaurGame from "./pixijs/DinosaurGame/DinosaurGame";
-import TestPixiGame from "./pixijs/TestPixiGame";
+import TestPixiGame from "./pixijs/TestGame/TestPixiGame";
 import DragAndDropGame from "./pixijs/DragAndDropGame/DragAndDropGame";
 import SpaceInvadersGame from "./pixijs/SpaceInvadersGame/SpaceInvadersGame";
 import { GamePage } from "./pages/GamePage/GamePage";
@@ -18,7 +18,6 @@ import { GamePage } from "./pages/GamePage/GamePage";
 function App() {
   const authCtx = useAuth();
   const [loading, setLoading] = useState(true);
-  const [gameWon, setGameWon] = useState(false);
   // refreshes the user token on refresh
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -48,7 +47,17 @@ function App() {
               path="/test"
               element={
                 <ProtectedRoute>
-                  <DinosaurGame gameWon={gameWon} setGameWon={setGameWon} />
+                  <SpaceInvadersGame
+                    setGameWon={() => {}}
+                    gameStatus={false}
+                    gameInformation={{
+                      questionText:
+                        "Which of the following is NOT a programming paradigm?",
+                      answerChoices: Array(4),
+                      correctAnswer: 3,
+                    }}
+                    answerOrder="DDDDBBACDCACADDDCBDADDBCDBDDAACABBABCDAABDADBCBADBBABDAADACBDDBCABADBADBADBDABABBBBBABDAACBDADBCBDBDBBCCADCCDBDBCBCACCDCADBDDAABCACBCCAADCCBADDDDDCBDCCBCAAADABBDDBCCBDADDBBBDABBACCBBDCBBCABAADADACADAC"
+                  />
                 </ProtectedRoute>
               }
             />

@@ -27,6 +27,7 @@ namespace CodingChallengeReal.Repositories.Implementation
         {
             var questionAsJson = SystemTextJson.JsonSerializer.Serialize(question);
             var itemAsDocument = Document.FromJson(questionAsJson);
+            Console.WriteLine($"Item: {questionAsJson.ToString()}");
             var itemAsAttribute = itemAsDocument.ToAttributeMap();
             var createItemRequest = new PutItemRequest
             {
@@ -45,7 +46,7 @@ namespace CodingChallengeReal.Repositories.Implementation
                 TableName = _databaseSettings.Value.TableName,
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    {"pk", new AttributeValue {S = $"q#{id}"} },
+                    {"pk", new AttributeValue {S = $"ps#{id}"} },
                     {"sk", new AttributeValue {S = "meta"} }
                 }
             };
@@ -60,7 +61,7 @@ namespace CodingChallengeReal.Repositories.Implementation
                 TableName = _databaseSettings.Value.TableName,
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    {"pk", new AttributeValue {S = $"q#{id}" } },
+                    {"pk", new AttributeValue {S = $"ps#{id}" } },
                     {"sk", new AttributeValue {S = "meta"} }
                 }
             };
@@ -74,6 +75,8 @@ namespace CodingChallengeReal.Repositories.Implementation
             var itemAsDocument = Document.FromAttributeMap(response.Item);
             return SystemTextJson.JsonSerializer.Deserialize<ProblemSetDTO>(itemAsDocument.ToJson());
         }
+
+
 
         public async Task<bool> UpdateAsync(Guid id, ProblemSet question)
         {
@@ -90,7 +93,6 @@ namespace CodingChallengeReal.Repositories.Implementation
             var response = await _dynamoDB.PutItemAsync(updateItemRequest);
             return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
-
 
     }
 

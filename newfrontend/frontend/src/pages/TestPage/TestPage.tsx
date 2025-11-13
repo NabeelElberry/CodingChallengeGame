@@ -1,4 +1,4 @@
-import TestPixiGame from "../../pixijs/TestPixiGame";
+import TestPixiGame from "../../pixijs/TestGame/TestPixiGame";
 
 export const TestPage = () => {
   return (

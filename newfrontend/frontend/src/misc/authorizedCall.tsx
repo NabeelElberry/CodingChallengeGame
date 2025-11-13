@@ -13,6 +13,7 @@ const authorizedCall = async (
   const token = await authCtx.user?.getIdToken();
 
   try {
+    // for GET requests just put undefined for last two parameters if don't need them
     if (requestType == "GET") {
       response = await axios.get(`${authCtx.API_URL}/${endpoint}`, {
         params: dataToSend,
@@ -42,7 +43,7 @@ const authorizedCall = async (
         console.log(
           `In authorized call POST, URL: ${authCtx.API_URL}/${endpoint}`
         );
-        response = await axios.post(`${authCtx.API_URL}/queueUsers`, null, {
+        response = await axios.post(`${authCtx.API_URL}/${endpoint}`, null, {
           params: dataToSend,
           headers: {
             Authorization: `Bearer ${token}`,

@@ -11,14 +11,14 @@ namespace CodingChallengeReal.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class ProblemSetController: Controller
+    public class ProblemSetController : Controller
     {
-        private readonly IProblemSetRepository _questionRepository;
+        private readonly IProblemSetRepository _problemSetRepository;
         private readonly IMapper _mapper;
 
         public ProblemSetController(IProblemSetRepository questionRepository, IMapper mapper)
         {
-            this._questionRepository = questionRepository;
+            this._problemSetRepository = questionRepository;
             this._mapper = mapper;
         }
 
@@ -33,8 +33,7 @@ namespace CodingChallengeReal.Controllers
 
             ProblemSet question = _mapper.Map<ProblemSet>(addQuestionRequest);
             question.id = Guid.NewGuid().ToString();
-            question.sk = "meta";
-            await _questionRepository.AddAsync(question);
+            await _problemSetRepository.AddAsync(question);
 
             return Ok(question);
         }
@@ -42,31 +41,44 @@ namespace CodingChallengeReal.Controllers
         [HttpGet]
         public async Task<IActionResult> GetQuestionAsync(Guid id)
         {
-            var questionDTO = await _questionRepository.GetAsync(id);
+            var questionDTO = await _problemSetRepository.GetAsync(id);
             return Ok(questionDTO);
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteQuestionAsync(Guid id)
         {
-            var deletedUserBool = await _questionRepository.DeleteAsync(id);
-         
-            
+            var deletedUserBool = await _problemSetRepository.DeleteAsync(id);
+
+
             return Ok(deletedUserBool);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateQuestionAsync(Guid id, AddProblemSetDTO addQuestionRequest)
         {
-            ProblemSetDTO originalQuestion = await _questionRepository.GetAsync(id);
+            ProblemSetDTO originalQuestion = await _problemSetRepository.GetAsync(id);
 
             if (originalQuestion == null)
             {
                 return Ok(false);
             }
             originalQuestion.Questions = addQuestionRequest.Questions;
-            var updatedUser = await _questionRepository.UpdateAsync(id, _mapper.Map<ProblemSet>(originalQuestion));
+            var updatedUser = await _problemSetRepository.UpdateAsync(id, _mapper.Map<ProblemSet>(originalQuestion));
 
             return Ok(updatedUser);
+        }
+        [HttpGet("/getQuestionByIdAndQuestionNumber")]
+        public async Task<IActionResult> GetQuestionInformationByProblemSetIDAndQuestionNumber(Guid id, int questionNumber)
+        {
+            ProblemSetDTO problemSet = await _problemSetRepository.GetAsync(id);
+            if (questionNumber < problemSet.Questions.Count)
+            {
+                return Ok(problemSet.Questions[questionNumber]);
+            } else
+            {
+                return NotFound("Number was out of scope");
+            }
+
         }
     }
 }

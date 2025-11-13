@@ -4,7 +4,7 @@ import { Container, Graphics, Rectangle, Sprite } from "pixi.js";
 
 import { BunnySprite } from "./BunnySprite";
 import { useEffect, useRef, useState } from "react";
-import { checkForAABB } from "./Utils/pixiutils";
+import { checkForAABB } from "../Utils/pixiutils";
 
 extend({ Container, Graphics, Sprite });
 

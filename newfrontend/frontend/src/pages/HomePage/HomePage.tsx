@@ -21,6 +21,7 @@ import {
   variants,
 } from "../../exported_styles/styles";
 import { useNavigate } from "react-router-dom";
+import { Select } from "@mantine/core";
 
 export const HomePage = () => {
   return (
@@ -45,7 +46,9 @@ export const HomeBody = () => {
   const [casualCompVisible, setCasualCompVisible] = useState(-1); // -1 means none visible, 0 means both, 1 means casual, 2 means comp
   const [queueVisible, setQueueVisible] = useState(false);
   const [matchFound, setMatchFound] = useState(false);
-  const [responseState, setResponseState] = useState(false);
+  const [selectedProblemSet, setSelectedProblemSet] = useState<string | null>(
+    ""
+  );
 
   const navigate = useNavigate();
 
@@ -83,12 +86,10 @@ export const HomeBody = () => {
 
     if (selectedSequence.length <= 2) {
       // then there'll only be one in the sequence, so may as well just empty it
-      console.log("Empty selected seq");
       setSelectedSequence([]);
     } else {
       setSelectedSequence(array);
     }
-    console.log("step: " + step);
 
     if (step - 1 <= 1) {
       setModesVisible(0);
@@ -180,19 +181,18 @@ export const HomeBody = () => {
     // first we need to create the match in the DB through backend
 
     const param = matchData?.matchDto;
-    console.log(
-      "matchData: ",
-      matchData?.matchDto,
-      `USER1: ${param?.user1}, user2 ${param?.user2}`
-    );
     const sendSignal = async (confirm: boolean) => {
+      console.log("SelectedProblemSet: ", selectedProblemSet);
+
       if (param) {
         try {
+          matchCtx.setProblemSetId(selectedProblemSet!);
           await connectionRef.current?.invoke(
             "JoinMatchRoom",
             param.user1,
             param.user2,
-            confirm
+            confirm,
+            selectedProblemSet
           );
         } catch (e) {
           console.log(`Ran into an error ${e}`);
@@ -224,15 +224,31 @@ export const HomeBody = () => {
     <div className="h-full w-full bg-navbar-bg flex items-center justify-center overflow-hidden">
       <QueuePop />
       <div className="relative inline-block">
-        <button
-          onClick={() => handleBackLogic()}
-          className="absolute top-0 left-0 bg-text-color text-button-text rounded-2xl px-4 py-2"
-        >
-          <SlActionUndo />
-        </button>
-
+        <div className="flex flex-row w-full items-end">
+          <button
+            onClick={() => handleBackLogic()}
+            className=" bg-text-color h-fit p-3 mr-auto text-button-text rounded-2xl px-4  hover:cursor-pointer hover:scale-110 ease-in-out duration-100"
+          >
+            <SlActionUndo />
+          </button>
+          <Select
+            className="justify-end"
+            label="Problem Set To Play"
+            placeholder="Pick one..."
+            data={[
+              {
+                value: "d659af7f-ed35-48c4-9729-1a18a4360478",
+                label: "Coding",
+              },
+              { value: "languages", label: "Languages" },
+              { value: "history", label: "History" },
+            ]}
+            value={selectedProblemSet}
+            onChange={setSelectedProblemSet}
+          />
+        </div>
         {/* 2) Push the grid down so it clears the back button */}
-        <div className="pt-12 flex items-center justify-center">
+        <div className="pt-6 flex items-center justify-center">
           <motion.div className="flex flex-col items-center justify-center gap-6">
             <LayoutGroup>
               <AnimatePresence mode="popLayout">

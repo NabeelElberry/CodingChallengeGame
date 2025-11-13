@@ -28,3 +28,41 @@ export const checkForAABBNoObject = (
     coordinates1.y + size1.height > coordinates2.y
   );
 };
+
+export const numToAnswer = (input: number) => {
+  if (input >= 3) {
+    //console.log(`Input is ${input}, returning D`);
+    return "D";
+  }
+  if (input >= 2) {
+    //console.log(`Input is ${input}, returning C`);
+    return "C";
+  }
+  if (input >= 1) {
+    //console.log(`Input is ${input}, returning B`);
+    return "B";
+  }
+  if (input >= 0) {
+    //console.log(`Input is ${input}, returning A`);
+    return "A";
+  }
+  return "UNDEFINED";
+};
+
+export const generateAnswerChoice = () => {
+  const val = Math.random() * 4;
+  // console.log(`Number: ${val}`);
+  return numToAnswer(val);
+};
+
+export const answerToNumber = (letter: string) => {
+  if (letter == "D") {
+    return 3;
+  } else if (letter == "C") {
+    return 2;
+  } else if (letter == "B") {
+    return 1;
+  } else {
+    return 0;
+  }
+};
