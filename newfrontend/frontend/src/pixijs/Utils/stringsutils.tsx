@@ -33,13 +33,10 @@ export const retrieveGameOrder = (
 
   if (parseInt(currentMinigameNumber) == 0) {
     whatToQuery = gameOrderJson.zero.toString();
-    console.log(`ZERO: ${typeof gameOrderJson.zero}`);
   } else if (parseInt(currentMinigameNumber) == 1) {
     whatToQuery = gameOrderJson.one.toString();
-    console.log(`ONE: ${typeof gameOrderJson.one}`);
   } else if (parseInt(currentMinigameNumber) == 2) {
     whatToQuery = gameOrderJson.two.toString();
-    console.log(`: ${typeof gameOrderJson.two}`);
   }
 
   console.log(

@@ -12,6 +12,7 @@ import SpaceInvadersGame from "../../pixijs/SpaceInvadersGame/SpaceInvadersGame"
 import type { Question } from "../../pixijs/Utils/interfaces";
 import { useMatchCtx } from "../../store/MatchCtx";
 import { retrieveGameOrder } from "../../pixijs/Utils/stringsutils";
+import { GameCountdown } from "../../components/GameCountdown";
 
 export const GamePage = () => {
   // essentially we're gonna call to get the information of the match using the details loaded
@@ -35,6 +36,7 @@ export const GamePage = () => {
   const [state, dispatch] = useReducer(gameReducer, initialGameState);
   const authCtx = useAuth();
   const matchCtx = useMatchCtx();
+  const [countdown, setCountdown] = useState(false);
 
   const {
     loading,
@@ -164,36 +166,56 @@ export const GamePage = () => {
   // and is used for loading in the question data
   useEffect(() => {
     console.log("In second useEffect");
-    // if current stage is set, or we didn't set questionOrder yet (first useEffect didn't run properly), or questionInformation already set
-    if (currentStage == -1 || !questionOrder || questionInformation) return;
+    // If we shouldn't load data, stop here.
+    if (currentStage === -1 || !questionOrder || questionInformation) return;
 
-    const currentQuestion = questionOrder!.split("_")[currentStage]; // current question we're on, splitting the string
+    const currentQuestion = questionOrder.split("_")[currentStage];
 
-    // getting question information for the minigame
-    authorizedCall(
-      authCtx,
-      "GET",
-      "getQuestionByIdAndQuestionNumber",
-      undefined,
-      { id: matchCtx.problemSetId, questionNumber: currentQuestion }
-    ).then((result) => {
-      console.log(`Question Information: `, result.data);
-      const questionInformation = result.data;
+    // Define an async function to handle the Promise-based API call
+    const fetchQuestionData = async () => {
+      try {
+        // 1. Await the authorizedCall to get the resolved data
+        const result = await authorizedCall(
+          authCtx,
+          "GET",
+          "getQuestionByIdAndQuestionNumber",
+          undefined,
+          { id: matchCtx.problemSetId, questionNumber: currentQuestion }
+        );
 
-      const currentGameAnswerOrder = retrieveGameOrder(
-        fullAnswerOrder!,
-        currentStage,
-        minigameOrder!,
-        currentMinigameNumber!
-      );
-      dispatch({
-        type: "SET_QUESTION_DATA",
-        payload: { questionInformation, currentGameAnswerOrder },
-      });
-    });
-  }, [currentStage, questionOrder, questionInformation]);
+        console.log(`Question Information: `, result.data);
+        const questionInformation = result.data;
 
-  const gameWinFunction = (gameNumber: 1 | 2 | 3) => {
+        // 2. Only run the processing and dispatch after the data is received
+        const currentGameAnswerOrder = retrieveGameOrder(
+          fullAnswerOrder!,
+          currentStage,
+          minigameOrder!,
+          currentMinigameNumber!
+        );
+
+        dispatch({
+          type: "SET_QUESTION_DATA",
+          payload: { questionInformation, currentGameAnswerOrder },
+        });
+      } catch (error) {
+        // Handle potential API errors here
+        console.error("Failed to fetch question data:", error);
+      }
+    };
+
+    // Execute the async function
+    fetchQuestionData();
+  }, [
+    currentStage,
+    questionOrder,
+    questionInformation,
+    fullAnswerOrder,
+    minigameOrder,
+    currentMinigameNumber,
+  ]); // <-- Updated Dependencies
+
+  const gameWinFunction = async (gameNumber: 1 | 2 | 3) => {
     // says that round is won
     dispatch({
       type: "SET_GAME_WIN_STATUS",
@@ -202,11 +224,13 @@ export const GamePage = () => {
 
     // update in Redis
     const newStage = currentStage + 1;
-    authorizedCall(authCtx, "POST", "editPlayerLevel", "P", {
+    await authorizedCall(authCtx, "POST", "editPlayerLevel", "P", {
       uid: authCtx.UID,
       newLevel: newStage,
     });
     console.log(`New Stage: ${newStage}`);
+
+    setCountdown(true); // start countdown for next game
 
     const nextGameAnswerOrder = retrieveGameOrder(
       fullAnswerOrder!,
@@ -251,6 +275,9 @@ export const GamePage = () => {
     // locally update state
     // updating the current minigame for the player, based on their new level
   };
+  const onComplete = () => {
+    setCountdown(false);
+  };
 
   // what we should be doing is on every match completion we should update our redis list
   // with the current state of what level each player is on,
@@ -276,10 +303,15 @@ export const GamePage = () => {
   // 0 is dinosaur game, 1 is drag and drop game, 2 is space invaders game
   if (currentStage == 5) return <div>Game done</div>;
 
+  if (countdown) {
+    return <GameCountdown onComplete={onComplete} />;
+  }
+
   if (currentMinigameNumber === "0") {
     // console.log("In Dino Game");
     return (
-      <div>
+      <div style={{ color: "white" }}>
+        <div>ROUND {currentStage} </div>
         <p>{questionInformation?.questionText}</p>
         {questionInformation?.answerChoices.map((answerChoice, index) => (
           <p key={index}>
@@ -299,7 +331,8 @@ export const GamePage = () => {
   } else if (currentMinigameNumber === "1") {
     // console.log("In Drag/Drop Game");
     return (
-      <div>
+      <div style={{ color: "white" }}>
+        <div>ROUND {currentStage} </div>
         <p>{questionInformation?.questionText}</p>
         {questionInformation?.answerChoices.map((answerChoice, index) => (
           <p key={index}>
@@ -318,7 +351,8 @@ export const GamePage = () => {
   } else {
     // console.log("In Space Invaders Game");
     return (
-      <div>
+      <div style={{ color: "white" }}>
+        <div>ROUND {currentStage} </div>
         <p>{questionInformation?.questionText}</p>
         {questionInformation?.answerChoices.map((answerChoice, index) => (
           <p key={index}>
