@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useAuth } from "../../store/AuthCtx";
 import authorizedCall from "../../misc/authorizedCall";
 import DinosaurGame from "../../pixijs/DinosaurGame/DinosaurGame";
@@ -9,10 +9,12 @@ import type {
 } from "../../exported_styles/interfaces";
 import DragAndDropGame from "../../pixijs/DragAndDropGame/DragAndDropGame";
 import SpaceInvadersGame from "../../pixijs/SpaceInvadersGame/SpaceInvadersGame";
+import useSignalR from "../../hooks/useSignalR";
 import type { Question } from "../../pixijs/Utils/interfaces";
 import { useMatchCtx } from "../../store/MatchCtx";
 import { retrieveGameOrder } from "../../pixijs/Utils/stringsutils";
 import { GameCountdown } from "../../components/GameCountdown";
+import { MatchResultScreen } from "../../components/MatchResultScreen";
 
 export const GamePage = () => {
   // essentially we're gonna call to get the information of the match using the details loaded
@@ -37,6 +39,7 @@ export const GamePage = () => {
   const authCtx = useAuth();
   const matchCtx = useMatchCtx();
   const [countdown, setCountdown] = useState(false);
+  const [matchOver, setMatchOver] = useState(false);
 
   const {
     loading,
@@ -53,27 +56,29 @@ export const GamePage = () => {
     gameTwo,
     gameThree,
   } = state;
-
+  const { connectionRef } = useSignalR();
+  const timeSentRef = useRef(false);
   function gameReducer(state: GameState, action: GameAction): GameState {
     switch (action.type) {
       case "INIT_MATCH_SUCCESS":
         const {
           matchInfo,
-          currentStage,
+          currentStageNum,
           minigameOrder,
           questionOrder,
           fullAnswerOrder,
           onLoadTime,
         } = action.payload;
+
         return {
           ...state,
           loading: false,
           matchInfo,
-          currentStage: currentStage,
+          currentStage: currentStageNum,
           minigameOrder,
           questionOrder,
           fullAnswerOrder,
-          currentMinigameNumber: minigameOrder[currentStage],
+          currentMinigameNumber: minigameOrder[currentStageNum],
           onLoadTime,
         };
 
@@ -82,18 +87,6 @@ export const GamePage = () => {
           ...state,
           questionInformation: action.payload.questionInformation,
           currentGameAnswerOrder: action.payload.currentGameAnswerOrder,
-        };
-
-      case "NEXT_STAGE":
-        const newStage = state.currentStage + 1;
-        const newMinigame = state.minigameOrder![newStage];
-
-        return {
-          ...state,
-          currentStage: newStage,
-          currentMinigameNumber: newMinigame,
-          currentGameAnswerOrder: action.payload.nextAnswer,
-          questionInformation: null, // Reset question to trigger loading logic
         };
 
       case "SET_GAME_WIN_STATUS":
@@ -107,6 +100,18 @@ export const GamePage = () => {
           default:
             return state;
         }
+
+      case "ADVANCE_STAGE":
+        const nextStage = state.currentStage + 1;
+        return {
+          ...state,
+          currentStage: nextStage,
+          currentMinigameNumber: state.minigameOrder![nextStage],
+          questionInformation: null,
+          currentGameAnswerOrder: null,
+        };
+      default:
+        return state;
     }
   }
 
@@ -118,8 +123,8 @@ export const GamePage = () => {
       authCtx,
       "GET",
       "getMatchInfoForPlayer",
-      undefined,
-      { uid: authCtx.UID, problemSetId }
+      "P",
+      { problemSetId },
     );
 
     matchInformation.then((result) => {
@@ -129,27 +134,38 @@ export const GamePage = () => {
         const currentStage = Number(result.data[`level:${authCtx.UID}`]); // the stage the current player is at
         const minigameOrder: string = result.data!.minigameOrder; // string containing order of minigames to be played eg: "12212"
 
+        console.log("Payload: ", {
+          matchInfo: matchData,
+          currentStageNum: currentStage,
+          minigameOrder,
+          questionOrder: matchData.questionOrder,
+          fullAnswerOrder: matchData.fullAnswerOrder,
+          onLoadTime,
+        });
+
         dispatch({
           type: "INIT_MATCH_SUCCESS",
           payload: {
             matchInfo: matchData,
-            currentStage,
+            currentStageNum: currentStage,
             minigameOrder,
             questionOrder: matchData.questionOrder,
             fullAnswerOrder: matchData.fullAnswerOrder,
             onLoadTime,
           },
         });
-        console.log(`Index: ${currentStage}`);
-        console.log(`Match Information:`, result.data);
+        // console.log(`Index: ${currentStage}`);
+        // console.log(`Match Information:`, result.data);
       } catch {
         console.log("No result.data found");
       }
     });
 
     // on dismount
-    // update current time
+    // update current time (only if matchOver didn't already send it)
     return () => {
+      if (timeSentRef.current) return;
+      timeSentRef.current = true;
       const previousTime = matchInfo?.[`time:${authCtx.UID}`] ?? 0;
       const currTime = Math.floor(performance.now());
 
@@ -165,82 +181,101 @@ export const GamePage = () => {
   // this useEffect runs when the initial match information has been loaded
   // and is used for loading in the question data
   useEffect(() => {
-    console.log("In second useEffect");
-    // If we shouldn't load data, stop here.
     if (currentStage === -1 || !questionOrder || questionInformation) return;
 
-    const currentQuestion = questionOrder.split("_")[currentStage];
+    let cancelled = false;
+    // check for game won condition
+    if (currentStage == 5) {
+      // invoke the signal R to notify both all clients of winner
+      connectionRef.current?.invoke("ReceivedClientWin");
+      return () => {
+        console.log("Match over...");
+      };
+    }
 
-    // Define an async function to handle the Promise-based API call
     const fetchQuestionData = async () => {
-      try {
-        // 1. Await the authorizedCall to get the resolved data
-        const result = await authorizedCall(
-          authCtx,
-          "GET",
-          "getQuestionByIdAndQuestionNumber",
-          undefined,
-          { id: matchCtx.problemSetId, questionNumber: currentQuestion }
-        );
+      const currentQuestion = questionOrder.split("_")[currentStage];
 
-        console.log(`Question Information: `, result.data);
-        const questionInformation = result.data;
+      const result = await authorizedCall(
+        authCtx,
+        "GET",
+        "getQuestionByIdAndQuestionNumber",
+        undefined,
+        { id: matchCtx.problemSetId, questionNumber: currentQuestion },
+      );
 
-        // 2. Only run the processing and dispatch after the data is received
-        const currentGameAnswerOrder = retrieveGameOrder(
-          fullAnswerOrder!,
-          currentStage,
-          minigameOrder!,
-          currentMinigameNumber!
-        );
+      if (cancelled) return;
 
-        dispatch({
-          type: "SET_QUESTION_DATA",
-          payload: { questionInformation, currentGameAnswerOrder },
-        });
-      } catch (error) {
-        // Handle potential API errors here
-        console.error("Failed to fetch question data:", error);
-      }
+      const currentGameAnswerOrder = retrieveGameOrder(
+        fullAnswerOrder!,
+        currentStage,
+        minigameOrder!,
+        currentMinigameNumber!,
+      );
+
+      dispatch({
+        type: "SET_QUESTION_DATA",
+        payload: {
+          questionInformation: result.data,
+          currentGameAnswerOrder,
+        },
+      });
     };
 
-    // Execute the async function
     fetchQuestionData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     currentStage,
     questionOrder,
-    questionInformation,
     fullAnswerOrder,
     minigameOrder,
     currentMinigameNumber,
-  ]); // <-- Updated Dependencies
+  ]);
 
+  // this one just updates the game page to be for win whenever the matchCtx changes from signalR
+  useEffect(() => {
+    setMatchOver(matchCtx.matchOver);
+    if (matchCtx.matchOver && !timeSentRef.current) {
+      timeSentRef.current = true;
+      const previousTime = matchInfo?.[`time:${authCtx.UID}`] ?? 0;
+      const currTime = Math.floor(performance.now());
+      const newTime = previousTime + (currTime - onLoadTime);
+      authorizedCall(authCtx, "POST", "editPlayerTime", "P", {
+        uid: authCtx.UID,
+        newTime: newTime,
+      });
+    }
+  }, [matchCtx.matchOver]);
+
+  // incrementation of stages happens here
   const gameWinFunction = async (gameNumber: 1 | 2 | 3) => {
     // says that round is won
+    if (countdown) return; // no double-advance
+
     dispatch({
       type: "SET_GAME_WIN_STATUS",
       payload: { gameNumber, status: true },
     });
 
-    // update in Redis
-    const newStage = currentStage + 1;
     await authorizedCall(authCtx, "POST", "editPlayerLevel", "P", {
       uid: authCtx.UID,
-      newLevel: newStage,
+      newLevel: 1,
     });
-    console.log(`New Stage: ${newStage}`);
+    // console.log(`New Stage: ${newStage}`);
 
     setCountdown(true); // start countdown for next game
 
-    const nextGameAnswerOrder = retrieveGameOrder(
-      fullAnswerOrder!,
-      currentStage,
-      minigameOrder!,
-      currentMinigameNumber!
-    );
+    // const nextGameAnswerOrder = retrieveGameOrder(
+    //   fullAnswerOrder!,
+    //   newStage,
+    //   minigameOrder!,
+    //   currentMinigameNumber!
+    // );
     dispatch({
-      type: "NEXT_STAGE",
-      payload: { nextAnswer: nextGameAnswerOrder },
+      type: "ADVANCE_STAGE",
     });
 
     // reset win status after a short delay
@@ -251,7 +286,7 @@ export const GamePage = () => {
             type: "SET_GAME_WIN_STATUS",
             payload: { gameNumber: 1, status: false },
           }),
-        1000
+        1000,
       );
     if (gameNumber === 2)
       setTimeout(
@@ -260,7 +295,7 @@ export const GamePage = () => {
             type: "SET_GAME_WIN_STATUS",
             payload: { gameNumber: 2, status: false },
           }),
-        1000
+        1000,
       );
     if (gameNumber === 3)
       setTimeout(
@@ -269,7 +304,7 @@ export const GamePage = () => {
             type: "SET_GAME_WIN_STATUS",
             payload: { gameNumber: 3, status: false },
           }),
-        1000
+        1000,
       );
 
     // locally update state
@@ -294,19 +329,35 @@ export const GamePage = () => {
   // UPDATE is simply changing the value
   // ADD is accumulating it
 
+  if (matchOver == true) {
+    const sessionMs =
+      onLoadTime > 0 ? Math.floor(performance.now()) - onLoadTime : 0;
+    const totalTimeMs =
+      (matchInfo?.[`time:${authCtx.UID}` as `time:${string}`] ?? 0) + sessionMs;
+    return (
+      <MatchResultScreen won={matchCtx.wonMatch} totalTimeMs={totalTimeMs} />
+    );
+  }
+
   // In total:
   // On game completion add mistakes and update time to redis hash with match info, and add one to game
   // On refresh: UPDATE the current time, and ADD mistakes and in react start our current time timer with the time received from redis hash
   // Correct access with optional chaining
-  if (loading || !questionInformation) return <div>Loading...</div>;
+  if (loading || !questionInformation) {
+    console.log("Loading...!");
+    console.log("QUESTION INFORMATION: ", questionInformation);
+
+    return <div>Loading...</div>;
+  }
+
   // uses player's current level to get the game they should be playing
   // 0 is dinosaur game, 1 is drag and drop game, 2 is space invaders game
-  if (currentStage == 5) return <div>Game done</div>;
 
   if (countdown) {
     return <GameCountdown onComplete={onComplete} />;
   }
 
+  // check for winner
   if (currentMinigameNumber === "0") {
     // console.log("In Dino Game");
     return (

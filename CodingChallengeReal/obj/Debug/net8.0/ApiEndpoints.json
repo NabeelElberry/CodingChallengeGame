@@ -34,11 +34,6 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "uid",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
         "Name": "newLevel",
         "Type": "System.Int32",
         "IsRequired": false
@@ -55,11 +50,6 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "uid",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
         "Name": "newTime",
         "Type": "System.Int32",
         "IsRequired": false
@@ -74,18 +64,7 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [
-      {
-        "Name": "uid",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "problemSetId",
-        "Type": "System.Guid",
-        "IsRequired": false
-      }
-    ],
+    "Parameters": [],
     "ReturnTypes": []
   },
   {
@@ -281,11 +260,6 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": false
-      },
       {
         "Name": "mmr",
         "Type": "System.Int32",

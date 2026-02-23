@@ -6,7 +6,7 @@ const authorizedCall = async (
   requestType: "GET" | "POST",
   endpoint: string,
   bodyOrParams?: "B" | "P",
-  dataToSend?: any
+  dataToSend?: any,
 ) => {
   let response;
 
@@ -15,6 +15,7 @@ const authorizedCall = async (
   try {
     // for GET requests just put undefined for last two parameters if don't need them
     if (requestType == "GET") {
+      console.log("GET P PARAMS: ", dataToSend);
       response = await axios.get(`${authCtx.API_URL}/${endpoint}`, {
         params: dataToSend,
         headers: {
@@ -22,12 +23,12 @@ const authorizedCall = async (
         },
       });
       console.log(
-        `In authorized call GET, URL: ${authCtx.API_URL}/${endpoint}`
+        `In authorized call GET, URL: ${authCtx.API_URL}/${endpoint}`,
       );
     } else {
       if (bodyOrParams == "B") {
         console.log(
-          `In authorized call POST, URL: ${authCtx.API_URL}/${endpoint}`
+          `In authorized call POST, URL: ${authCtx.API_URL}/${endpoint}`,
         );
         response = response = await axios.post(
           `${authCtx.API_URL}/${endpoint}`,
@@ -37,12 +38,14 @@ const authorizedCall = async (
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
       } else {
         console.log(
-          `In authorized call POST, URL: ${authCtx.API_URL}/${endpoint}`
+          `In authorized call POST, URL: ${authCtx.API_URL}/${endpoint}`,
         );
+
+        console.log("PARAMS: ", dataToSend);
         response = await axios.post(`${authCtx.API_URL}/${endpoint}`, null, {
           params: dataToSend,
           headers: {

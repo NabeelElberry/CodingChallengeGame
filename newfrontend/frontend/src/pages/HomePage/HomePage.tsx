@@ -6,6 +6,7 @@ import { getAuth } from "firebase/auth";
 import { useAuth } from "../../store/AuthCtx";
 import { jwtDecode } from "jwt-decode";
 import { useMatchCtx } from "../../store/MatchCtx";
+import { QueuePopInternal } from "../../components/QueuePopInternal";
 
 import useSignalR from "../../hooks/useSignalR";
 import authorizedCall from "../../misc/authorizedCall";
@@ -46,8 +47,9 @@ export const HomeBody = () => {
   const [casualCompVisible, setCasualCompVisible] = useState(-1); // -1 means none visible, 0 means both, 1 means casual, 2 means comp
   const [queueVisible, setQueueVisible] = useState(false);
   const [matchFound, setMatchFound] = useState(false);
+  const [userAccepted, setUserAccepted] = useState(false);
   const [selectedProblemSet, setSelectedProblemSet] = useState<string | null>(
-    ""
+    "",
   );
 
   const navigate = useNavigate();
@@ -55,6 +57,14 @@ export const HomeBody = () => {
   useEffect(() => {
     if (matchCtx.matchStatus == "ACCEPTED") {
       navigate("/match");
+    }
+    if (matchCtx.matchStatus == "DECLINED") {
+      const t = setTimeout(() => {
+        setMatchFound(false);
+        setUserAccepted(false);
+        matchCtx.setMatchStatus("NONE");
+      }, 2000);
+      return () => clearTimeout(t);
     }
   }, [matchCtx.matchStatus]);
 
@@ -103,21 +113,22 @@ export const HomeBody = () => {
     const token = await authCtx.user?.getIdToken();
     if (token) {
       const decodedToken = jwtDecode<FirebaseJwtPayload>(token);
-      console.log(`decoded token: ${decodedToken.user_id}`);
+      // console.log(`decoded token: ${decodedToken.user_id}`);
       const response = await authorizedCall(
         authCtx,
         "POST",
         "queueUsers",
         "P",
         {
-          userId: decodedToken.user_id,
           mmr: authCtx.mmr,
           mode: mode,
-        }
+        },
       );
 
       if (response.data != false) {
         setMatchData(response.data);
+        setUserAccepted(false);
+        matchCtx.setMatchStatus("NONE");
         setMatchFound(true);
       }
     }
@@ -159,8 +170,8 @@ export const HomeBody = () => {
             currentlySelected == buttonChosen
               ? "flash"
               : selectedSequence.includes(buttonChosen)
-              ? "selected"
-              : "idle"
+                ? "selected"
+                : "idle"
           }
           whileHover={
             !selectedSequence.includes(buttonChosen)
@@ -177,52 +188,33 @@ export const HomeBody = () => {
     );
   };
 
-  const QueuePop = () => {
-    // first we need to create the match in the DB through backend
-
+  const sendMatchSignal = async (confirm: boolean) => {
     const param = matchData?.matchDto;
-    const sendSignal = async (confirm: boolean) => {
-      console.log("SelectedProblemSet: ", selectedProblemSet);
-
-      if (param) {
-        try {
-          matchCtx.setProblemSetId(selectedProblemSet!);
-          await connectionRef.current?.invoke(
-            "JoinMatchRoom",
-            param.user1,
-            param.user2,
-            confirm,
-            selectedProblemSet
-          );
-        } catch (e) {
-          console.log(`Ran into an error ${e}`);
-        }
+    if (param) {
+      try {
+        if (confirm) setUserAccepted(true);
+        matchCtx.setProblemSetId(selectedProblemSet!);
+        await connectionRef.current?.invoke(
+          "JoinMatchRoom",
+          confirm,
+          selectedProblemSet,
+        );
+      } catch (e) {
+        // console.log(`Ran into an error ${e}`);
       }
-    };
-
-    // basically queue will pop up when we find a match, and when both accept or decline the queue will leave
-    return matchFound && matchCtx.matchStatus == "NONE" ? (
-      <div className="absolute w-full h-full backdrop-brightness-50 z-10 flex flex-col gap-2 items-center overflow-hidden justify-center">
-        <button
-          onClick={() => sendSignal(true)}
-          className="p-8 bg-text-color text-white text-2xl rounded-lg hover:cursor-pointer shadow-lg"
-        >
-          ACCEPT
-        </button>
-        <button
-          onClick={() => sendSignal(false)}
-          className="p-8 bg-text-color text-white text-2xl rounded-lg hover:cursor-pointer shadow-lg"
-        >
-          {" "}
-          DECLINE
-        </button>
-      </div>
-    ) : null;
+    }
   };
 
   return (
     <div className="h-full w-full bg-navbar-bg flex items-center justify-center overflow-hidden">
-      <QueuePop />
+      {matchFound && (
+        <QueuePopInternal
+          isDeclined={matchCtx.matchStatus === "DECLINED"}
+          hasAccepted={userAccepted}
+          onAccept={() => sendMatchSignal(true)}
+          onDecline={() => sendMatchSignal(false)}
+        />
+      )}
       <div className="relative inline-block">
         <div className="flex flex-row w-full items-end">
           <button
@@ -321,7 +313,7 @@ export const HomeBody = () => {
                     pulse
                     onClick={async () =>
                       await startQueue(
-                        casualCompVisible == 1 ? "casual" : "competitive"
+                        casualCompVisible == 1 ? "casual" : "competitive",
                       )
                     }
                   >

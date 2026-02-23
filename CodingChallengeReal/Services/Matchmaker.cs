@@ -21,8 +21,8 @@ namespace CodingChallengeReal.Services
         -- ARGV = { playerId }
 
         local queueKey   = KEYS[1]
-        local matchedSet = KEYS[2]
-        local matchHash  = KEYS[3]
+        local matchedSet = KEYS[2] -- stores all users
+        local matchHash  = KEYS[3] -- stores user pairs
         local me         = ARGV[1]
 
         -- 0) If I'm marked busy (initiator from a previous match), don't requeue.
@@ -33,8 +33,7 @@ namespace CodingChallengeReal.Services
 
         -- 1) If someone already paired me, I'm the joiner.
         local theirOpp = redis.call('HGET', matchHash, me)
-        if theirOpp then
-          -- do NOT add me to the set (only initiator lives there)
+        if theirOpp then -- mark me busy
           redis.call('LREM', queueKey, 0, me)
           redis.call('SADD', matchedSet, me)
           return { 'joiner', theirOpp }
@@ -93,7 +92,6 @@ namespace CodingChallengeReal.Services
 
             await _redis.ListLeftPushAsync(queueKey, playerId);
             Console.WriteLine($"Pushing {queueKey} with id: {playerId}");
-            Console.WriteLine("Attempting to make match...");
             // will keep running until the time per bucket is done, 
             while (minBucket-(loopNumber*100) > minElo || maxBucket+(loopNumber*100) < maxElo)
             {
@@ -166,7 +164,6 @@ namespace CodingChallengeReal.Services
                 }
             }
 
-
             if (result.Length != 0) // match found break out
             {
                 if (result.Length == 1) // we are busy, just return null.
@@ -187,7 +184,5 @@ namespace CodingChallengeReal.Services
             }
             return null; 
         }
-       
-
     }
 }

@@ -51,8 +51,10 @@ namespace CodingChallengeReal.Services
         local newValue  = ARGV[2]
 
         -- logic is simple, edits the field to be whatever new value
-
-        redis.call('HSET', matchKey, 'level:' ..  playerId, newValue)
+    
+        local prevVal = redis.call('HGET', matchKey, 'level:' .. playerId)
+        
+        redis.call('HSET', matchKey, 'level:' ..  playerId, prevVal + newValue)
         return true;
 ";
 
@@ -115,8 +117,7 @@ namespace CodingChallengeReal.Services
         -- KEYS = { matchKey }
 
         local matchKey = KEYS[1]
-        local check = redis.call('HGET', matchKey, 'minigameOrder') 
-        return check
+        return redis.call('HEXISTS', matchKey, 'minigameOrder')
         ";
 
         /// <summary>
@@ -130,37 +131,38 @@ namespace CodingChallengeReal.Services
         public async Task<String> CreateGameManager(string matchId, string playerOneId, string playerTwoId, Guid problemSetId) 
         {
 
-            var isInitiator = await _redis.ScriptEvaluateAsync(checkIfInitiator, new RedisKey[] { playerOneId });
-            string isInitiatorStr = isInitiator.ToString();
-            Console.WriteLine($"Is Initiator: {isInitiator}, playerOneId: ${playerOneId}");
-            if (isInitiatorStr == "0")
-            {
+            //var isInitiator = await _redis.ScriptEvaluateAsync(checkIfInitiator, new RedisKey[] { playerOneId });
+            //string isInitiatorStr = isInitiator.ToString();
+            //Console.WriteLine($"Is Initiator: {isInitiator}, playerOneId: ${playerOneId}");
+            //// case where we aren't initiator
+            //// if we're not the initiator, we wait for the initiator to create the match details
+            //if (isInitiatorStr == "0")
+            //{
 
-                var scriptPopulated = await _redis.ScriptEvaluateAsync(checkIfRedisHashPopulated, new RedisKey[] { Util.Key(playerOneId, playerTwoId) });
+            //    var scriptPopulated = await _redis.ScriptEvaluateAsync(checkIfRedisHashPopulated, new RedisKey[] { Util.Key(playerOneId, playerTwoId) });
 
-                Console.WriteLine($"Script Populated Result ? {scriptPopulated.ToString()}");
+            //    Console.WriteLine($"Script Populated Result ? {scriptPopulated.ToString()}");
 
-                while (scriptPopulated.IsNull)
-                {
-                    scriptPopulated = await _redis.ScriptEvaluateAsync(checkIfRedisHashPopulated, new RedisKey[] { Util.Key(playerOneId, playerTwoId) });
-                    
-                    Console.WriteLine("Rerunning");
-                    await Task.Delay(100);
-                }
+            //    //while ((int)scriptPopulated == 0) // this is the wait
+            //    //{
+            //    //    await Task.Delay(100);
+            //    //    scriptPopulated = await _redis.ScriptEvaluateAsync(checkIfRedisHashPopulated, new RedisKey[] { Util.Key(playerOneId, playerTwoId) });
+            //    //    // Console.WriteLine("Rerunning");
+            //    //}
 
-                return "Not initiator";
-            }
+            //    return "Not initiator";
+            //}
 
             
-
-            Random random = new Random();
+            // initiator creates match information
+            Random random = Random.Shared;
             string minigameOrderString = "";
             HashSet<int> problems = new HashSet<int>();
             int amountOfRounds = 5; // total number of rounds to play
             // the minigames currently correspond in this order: 0 = dino game, 1 = drag and drop game, 2 = space invaders
             int[] minigameOrderArray = new int[amountOfRounds]; 
             const int totalNumberOfGames = 3; // generates from 0-2, update to be the amount of minigames we have total
-            // generating minigame order
+            // generating MINIGAME order
             for (int i = 0; i < amountOfRounds; i++)
             {
                 int number = random.Next(0, totalNumberOfGames); 
@@ -176,9 +178,8 @@ namespace CodingChallengeReal.Services
             var problemSet = await _problemSetRepository.GetAsync(problemSetId);
 
             Console.WriteLine($"Problem Set: {problemSet.pk} Questions: {problemSet.Questions}");
-
+   
             int amountOfQuestionsInProblemSet = problemSet.Questions.Count; // adjust this once we get proper data, for now use placeholder of 10
-            //int amountOfQuestionsInProblemSet = 10;
             
             int questionsAdded = 0;
             string questions = "";
@@ -190,18 +191,13 @@ namespace CodingChallengeReal.Services
                 mixHashArrayDS.Insert(i);
             }
 
-            // adding consistent ordering to the each of the minigames
+            // adding consistent answer choice ordering to the each of the minigames
 
             Dictionary<int, List<string>> orderHolder = new Dictionary<int, List<string>>();
             orderHolder.Add(0, new List<string>());
             orderHolder.Add(1, new List<string>());
             orderHolder.Add(2, new List<string>());
-
-
-
-            //Console.WriteLine("MINIGAME ORDER ARRAY: {0}", string.Join(", ", minigameOrderArray)); // logging contents of this array
-
-            
+   
             for (int i = 0; i < minigameOrderArray.Length; i++)
             {
                 amountOfRounds = 0;
@@ -212,6 +208,7 @@ namespace CodingChallengeReal.Services
                 int x = 0;
                 if (currentMiniGame == 0 || currentMiniGame == 1) // dino game, drag and drop, generate about 200 
                 {
+                    // generates 200 letters for minigame 1 or 2
                     amountOfRounds = 200;
                     //Console.WriteLine("Minigame 0 or 1 chosen");
                     while (x < amountOfRounds)
@@ -222,11 +219,9 @@ namespace CodingChallengeReal.Services
 
                 } else if (currentMiniGame == 2) // space invaders
                 {
-                    //Console.WriteLine("Minigame 2 chosen");
+    
                     amountOfRounds = 12;
-                    //answerChoicesLeft = new Dictionary<char, int>();
-
-
+           
                     // this system ensures at least 2 of each answer choices, and then 4 more random ones
                     var choicesLeft = new List<(char c, int num)>
                     {
@@ -280,14 +275,21 @@ namespace CodingChallengeReal.Services
 
                 convertedDict.Add(stringKey, item.Value);
             }
-            
+     
             while (questionsAdded < 5) // pick 5 random questions
             {
                 var newElement = mixHashArrayDS.GetRandomElement(); // generate new random integer
                 questions += $"{newElement}_";
                 mixHashArrayDS.Remove(newElement);
                 questionsAdded++;
+       
             }
+
+
+            Console.WriteLine("INFO: ", playerOneId, playerTwoId, minigameOrderString, questions, problemSetId.ToString(), JsonConvert.SerializeObject(convertedDict).ToString());
+
+            // removing last underscore from minigame order string
+            minigameOrderString = minigameOrderString.TrimEnd('_');
 
             var scriptResult = await _redis.ScriptEvaluateAsync(luaInsertScript, // arguments for the script
                     new RedisKey[] { matchId }, // key
@@ -297,8 +299,8 @@ namespace CodingChallengeReal.Services
                     }
 
                 );
-
-            Console.WriteLine($"Script Result: {scriptResult}");
+            Console.WriteLine($"Questions: {questions}");
+            // Console.WriteLine($"Script Result: {scriptResult}");
            
             return scriptResult.ToString();
         }
@@ -333,7 +335,7 @@ namespace CodingChallengeReal.Services
         {
             var opponent = await GetPartner(playerId);
             var matchId = Util.Key(playerId, opponent);
-
+            Console.WriteLine("Edit time manager");
             var scriptResult = await _redis.ScriptEvaluateAsync(luaEditTimeScript, // arguments for the script
                 new RedisKey[] { matchId }, // key
                 new RedisValue[] { playerId, newValue.ToString() } // args
@@ -399,31 +401,30 @@ namespace CodingChallengeReal.Services
 
         public async Task<HashEntry[]> GetMatchInfoForPlayer(string uid, Guid problemSetId)
         {
+
+            Console.WriteLine($"UID : {uid} Problem set ID: {problemSetId}");
             var partner = await GetPartner(uid);
+            if (partner == null) return Array.Empty<HashEntry>();
+
             var matchKey = Util.Key(uid, partner);
 
-            Console.WriteLine($"MatchKey: {matchKey}");
+            // Console.WriteLine($"MatchKey: {matchKey}");
 
-            var hashEntries = await _redis.HashGetAllAsync(matchKey);
-
-
-            if (hashEntries.Length < 8)
+            var ready = await _redis.HashGetAsync(matchKey, "minigameOrder");
+            while (ready.IsNull)
             {
-                await CreateGameManager(matchKey, uid, partner, problemSetId);
+                ready = await _redis.HashGetAsync(matchKey, "minigameOrder");
+                await Task.Delay(100);
+                //Console.WriteLine("UserX ", uid, " is waiting...");
+            }
 
-                return await _redis.HashGetAllAsync(matchKey);
-            }
-            foreach (var entry in hashEntries)
-            {
-                
-                Console.WriteLine($"name: {entry.Name} value: {entry.Value}");
-            }
-            return hashEntries;
+            return await _redis.HashGetAllAsync(matchKey);
+
         }
 
         private char getRandomLetter()
         {
-            Random random = new Random();
+            Random random = Random.Shared;
             int number = random.Next(4);
             if (number == 0)
             {

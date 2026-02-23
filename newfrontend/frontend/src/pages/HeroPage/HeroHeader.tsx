@@ -18,6 +18,7 @@ export const HeroHeader = () => {
   const authCtx = useAuth();
   const navigate = useNavigate();
 
+  // TODO: shouldn't this also set the authentication context to be true?
   useEffect(() => {
     if (localStorage.getItem("access_token")) {
       const decodedToken = jwtDecode<FirebaseJwtPayload>(
@@ -65,10 +66,11 @@ export const HeroHeader = () => {
     email: string,
     password: string
   ) => {
+    // TODO: need error handling for if the user creation fails
     const userCredential = await createUser(email, password); // firebase
     const uid = userCredential.user.uid;
     // adding user into dynamodb
-
+    // TODO: look into encrypting or not storing password directly in dynamodb
     const response = await authorizedCall(authCtx, "POST", "User", "B", {
       username: username,
       email: email,
@@ -88,11 +90,11 @@ export const HeroHeader = () => {
     if (!userCredential.user) {
       throw new Error("Username and password do not match.");
     } else {
-      console.log("User sign in successful.");
+      // console.log("User sign in successful.");
       const token = await userCredential.user.getIdToken(true);
       authCtx.setAuthenticationStatus(true);
       authCtx.setUID(userCredential.user.uid);
-      console.log("auth status: ", authCtx.authenticationStatus);
+      // console.log("auth status: ", authCtx.authenticationStatus);
       authCtx.setAccessToken(token);
       localStorage.setItem("access_token", token);
       navigate("/home");

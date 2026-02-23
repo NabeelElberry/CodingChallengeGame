@@ -47,6 +47,18 @@ const useSignalR = () => {
         matchCtx.setMatchStatus("ACCEPTED");
       });
 
+      connectionR.on("MatchWinner", () => {
+        console.log("Match won");
+        matchCtx.setMatchOver(true);
+        matchCtx.setWonMatch(true);
+      });
+
+      connectionR.on("MatchLoser", () => {
+        console.log("Match lost");
+        matchCtx.setMatchOver(true);
+        matchCtx.setWonMatch(false);
+      });
+
       connectionR.onclose((err) => {
         console.error("❌ SignalR connection closed:", err?.message || err);
       });

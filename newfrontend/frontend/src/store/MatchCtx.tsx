@@ -9,6 +9,10 @@ export const MatchCtx = createContext({
   setProblemSetId: (p0: string) => {},
   loadGame: false,
   setLoadGame: (p0: boolean) => {},
+  matchOver: false,
+  setMatchOver: (p0: boolean) => {},
+  wonMatch: false,
+  setWonMatch: (p0: boolean) => {},
 });
 
 export const MatchCtxProvider = ({ children }: { children: ReactNode }) => {
@@ -18,6 +22,8 @@ export const MatchCtxProvider = ({ children }: { children: ReactNode }) => {
   >("NONE");
   const [problemSetId, setProblemSetId] = useState<string>("");
   const [loadGame, setLoadGame] = useState(false);
+  const [matchOver, setMatchOver] = useState(false);
+  const [wonMatch, setWonMatch] = useState(false);
   return (
     <MatchCtx.Provider
       value={{
@@ -29,6 +35,10 @@ export const MatchCtxProvider = ({ children }: { children: ReactNode }) => {
         setProblemSetId,
         loadGame,
         setLoadGame,
+        matchOver,
+        setMatchOver,
+        wonMatch,
+        setWonMatch,
       }}
     >
       {children}

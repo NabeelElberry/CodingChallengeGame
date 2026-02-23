@@ -176,13 +176,6 @@
         ],
         "parameters": [
           {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "mmr",
             "in": "query",
             "schema": {
@@ -222,23 +215,6 @@
         "tags": [
           "Match"
         ],
-        "parameters": [
-          {
-            "name": "uid",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "problemSetId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -252,13 +228,6 @@
           "Match"
         ],
         "parameters": [
-          {
-            "name": "uid",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "newLevel",
             "in": "query",
@@ -281,13 +250,6 @@
           "Match"
         ],
         "parameters": [
-          {
-            "name": "uid",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "newTime",
             "in": "query",

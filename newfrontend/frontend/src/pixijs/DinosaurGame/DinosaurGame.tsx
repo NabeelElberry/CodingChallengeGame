@@ -155,7 +155,7 @@ const PixiContainer = ({
         const topElement = newArray[newArray.length - 1] ?? 0;
         newArray.push(topElement + 20 + Math.random() * 200);
       }
-      console.log("Array: ", newArray);
+      // console.log("Array: ", newArray);
       return newArray;
     });
 
@@ -240,7 +240,7 @@ const PixiContainer = ({
             answerToNumber(treeValueRef[index].current!) ==
             gameInfoRef.current.correctAnswer
           ) {
-            console.log("Game Won");
+            // console.log("Game Won");
             // Only call setGameWon if the game hasn't already been won for this round
             if (!gameStatus) {
               setGameWon();

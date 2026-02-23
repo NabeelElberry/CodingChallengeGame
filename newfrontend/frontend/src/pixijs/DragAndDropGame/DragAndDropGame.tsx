@@ -51,9 +51,9 @@ const PixiContainer = ({
   // fetch information for level
   useEffect(() => {
     for (let i = 0; i < 4; i++) {
-      console.log(`Answer Order: ${answerOrder}`);
+      // console.log(`Answer Order: ${answerOrder}`);
       stringValueRefArray[i].current = answerOrder[i];
-      console.log(`First 4 text is: ${answerOrder[i]}`);
+      // console.log(`First 4 text is: ${answerOrder[i]}`);
     }
     setIsLoading(false);
 
@@ -67,7 +67,7 @@ const PixiContainer = ({
     return <div className="w-[800px] h-[400px]">Loading...</div>;
   }
 
-  console.log("Game Information: ", gameInformation);
+  // console.log("Game Information: ", gameInformation);
 
   let answerPressed = false;
   let correctAnswerIntersecting = false;
@@ -103,7 +103,7 @@ const PixiContainer = ({
   let indexPassed = 3;
   useTick((time) => {
     const dx = time.deltaTime * answerSpeed;
-    console.log(`IndexPassed: ${indexPassed}`);
+    // console.log(`IndexPassed: ${indexPassed}`);
     choiceRefs.forEach((containerRef, index) => {
       if (containerRef.current) {
         containerRef.current.x -= dx;
@@ -111,9 +111,10 @@ const PixiContainer = ({
           containerRef.current.x += app.screen.width + 200;
           stringValueRefArray[index].current = answerOrder[indexPassed];
           textValueRefArray[index].current!.text = answerOrder[indexPassed];
-          console.log(
-            `Should be changing containerRef text to ${answerOrder[indexPassed]}`
-          );
+          console
+            .log
+            // `Should be changing containerRef text to ${answerOrder[indexPassed]}`
+            ();
           indexPassed += 1;
 
           // if somehow they make it past 200 letters, just reuse it infinitely

@@ -92,13 +92,13 @@ namespace CodingChallengeReal.Controllers
         [HttpPost]
         [Route("/queueUsers")]
         public async Task<IActionResult> QueueUsersTogetherAsync(
-            [FromQuery] string userId,
+            
             [FromQuery] int mmr,
             [FromQuery] string mode)
         {
 
-
-            // COME BACK TO THIS
+            var userId = User.FindFirst("user_id").Value;
+            // TODO: COME BACK TO THIS
             if (mode == "casual") // casual mode doesn't need hard searching, slam everyone into the same redis queue and search from there
             {
                 var redis_queue = "queue";
@@ -157,9 +157,13 @@ namespace CodingChallengeReal.Controllers
         /// <param name="uid"></param>
         /// <returns></returns>
         [HttpGet("/getMatchInfoForPlayer")]
-        public async Task<IActionResult> GetMatchInfo([FromQuery] string uid, [FromQuery] Guid problemSetId)
+        public async Task<IActionResult> GetMatchInfo()
         {
-            var hashEntries = await _matchManager.GetMatchInfoForPlayer(uid, problemSetId);
+            var uid = User.FindFirst("user_id").Value;
+            var nproblemSetId = Guid.Parse(Request.Query["problemSetId"]);
+            Console.WriteLine("RAW UID: " + uid);
+            Console.WriteLine("RAW PROBLEMSET: " + nproblemSetId);
+            var hashEntries = await _matchManager.GetMatchInfoForPlayer(uid, nproblemSetId);
             Dictionary<String, String> values = new Dictionary<String, String>();
             foreach (var entry in hashEntries)
             {
@@ -172,14 +176,16 @@ namespace CodingChallengeReal.Controllers
         }
 
         [HttpPost("/editPlayerLevel")]
-        public async Task<IActionResult> EditPlayerLevel([FromQuery] string uid, [FromQuery] int newLevel)
+        public async Task<IActionResult> EditPlayerLevel([FromQuery] int newLevel)
         {
+            var uid = User.FindFirst("user_id").Value;
             return Ok(await _matchManager.EditLevelManager(uid, newLevel));
         }
 
         [HttpPost("/editPlayerTime")]
-        public async Task<IActionResult> EditPlayerTime([FromQuery] string uid, [FromQuery] int newTime)
+        public async Task<IActionResult> EditPlayerTime([FromQuery] int newTime)
         {
+            var uid = User.FindFirst("user_id").Value;
             return Ok(await _matchManager.EditTimeManager(uid, newTime));
         }
     }

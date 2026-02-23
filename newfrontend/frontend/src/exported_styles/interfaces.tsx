@@ -65,7 +65,7 @@ export type GameAction =
       type: "INIT_MATCH_SUCCESS"; // initial match loading
       payload: {
         matchInfo: MatchInfo;
-        currentStage: number;
+        currentStageNum: number;
         minigameOrder: string;
         questionOrder: string;
         fullAnswerOrder: string;
@@ -79,8 +79,11 @@ export type GameAction =
         currentGameAnswerOrder: string;
       };
     }
-  | { type: "NEXT_STAGE"; payload: { nextAnswer: string } } // updates the stage
+  // | { type: "NEXT_STAGE"; payload: { nextAnswer: string } } // updates the stage
   | {
       type: "SET_GAME_WIN_STATUS"; // buffer between rounds
       payload: { gameNumber: 1 | 2 | 3; status: boolean };
+    }
+  | {
+      type: "ADVANCE_STAGE";
     };
