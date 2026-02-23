@@ -160,10 +160,10 @@ namespace CodingChallengeReal.Controllers
         public async Task<IActionResult> GetMatchInfo()
         {
             var uid = User.FindFirst("user_id").Value;
-            var nproblemSetId = Guid.Parse(Request.Query["problemSetId"]);
+            
             Console.WriteLine("RAW UID: " + uid);
-            Console.WriteLine("RAW PROBLEMSET: " + nproblemSetId);
-            var hashEntries = await _matchManager.GetMatchInfoForPlayer(uid, nproblemSetId);
+            //Console.WriteLine("RAW PROBLEMSET: " + nproblemSetId);
+            var hashEntries = await _matchManager.GetMatchInfoForPlayer(uid);
             Dictionary<String, String> values = new Dictionary<String, String>();
             foreach (var entry in hashEntries)
             {
@@ -173,6 +173,23 @@ namespace CodingChallengeReal.Controllers
 
 
            return Ok(values);
+        }
+
+        [HttpGet("/getLevelForPlayer")]
+        public async Task<IActionResult> GetLevelForPlayer()
+        {
+            var uid = User.FindFirst("user_id").Value;
+
+            //Console.WriteLine("RAW PROBLEMSET: " + nproblemSetId);
+            var level = await _matchManager.GetMatchInfoForPlayer(uid);
+            if (level != null)
+            {
+                return Ok(level);
+            }
+            else
+            {
+                return NoContent();
+            }    
         }
 
         [HttpPost("/editPlayerLevel")]
@@ -187,6 +204,14 @@ namespace CodingChallengeReal.Controllers
         {
             var uid = User.FindFirst("user_id").Value;
             return Ok(await _matchManager.EditTimeManager(uid, newTime));
+        }
+
+        [HttpGet("/checkForPlayerInMatch")]
+        public async Task<IActionResult> CheckForPlayerInMatch()
+        {
+            var uid = User.FindFirst("user_id").Value;
+
+            return Ok(await _matchManager.CheckIfPlayerInMatch(uid));
         }
     }
 }

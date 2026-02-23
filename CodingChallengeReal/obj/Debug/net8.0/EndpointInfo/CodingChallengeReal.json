@@ -222,6 +222,18 @@
         }
       }
     },
+    "/getLevelForPlayer": {
+      "get": {
+        "tags": [
+          "Match"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/editPlayerLevel": {
       "post": {
         "tags": [
@@ -258,6 +270,18 @@
               "format": "int32"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/checkForPlayerInMatch": {
+      "get": {
+        "tags": [
+          "Match"
         ],
         "responses": {
           "200": {

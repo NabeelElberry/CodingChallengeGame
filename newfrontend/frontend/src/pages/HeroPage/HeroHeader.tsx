@@ -123,7 +123,16 @@ export const HeroHeader = () => {
   };
 
   return (
-    <div className="bg-navbar-bg flex flex-row w-full z-50 p-3 items-center shadow-sm">
+    <div
+      className="flex flex-row w-full z-50 p-3 items-center"
+      style={{
+        background: "rgba(13, 11, 30, 0.88)",
+        backdropFilter: "blur(14px)",
+        borderBottom: "1px solid rgba(102,98,255,0.3)",
+        boxShadow:
+          "0 1px 30px rgba(102,98,255,0.12), 0 4px 20px rgba(0,0,0,0.6)",
+      }}
+    >
       <Image
         src={logo}
         w={80}

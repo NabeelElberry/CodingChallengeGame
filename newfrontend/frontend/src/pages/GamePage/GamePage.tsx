@@ -2,20 +2,17 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { useAuth } from "../../store/AuthCtx";
 import authorizedCall from "../../misc/authorizedCall";
 import DinosaurGame from "../../pixijs/DinosaurGame/DinosaurGame";
-import type {
-  GameAction,
-  GameState,
-  MatchInfo,
-} from "../../exported_styles/interfaces";
+import type { GameAction, GameState } from "../../exported_styles/interfaces";
 import DragAndDropGame from "../../pixijs/DragAndDropGame/DragAndDropGame";
 import SpaceInvadersGame from "../../pixijs/SpaceInvadersGame/SpaceInvadersGame";
 import useSignalR from "../../hooks/useSignalR";
-import type { Question } from "../../pixijs/Utils/interfaces";
 import { useMatchCtx } from "../../store/MatchCtx";
 import { retrieveGameOrder } from "../../pixijs/Utils/stringsutils";
 import { GameCountdown } from "../../components/GameCountdown";
 import { MatchResultScreen } from "../../components/MatchResultScreen";
-
+import { CheckForInMatch } from "../../components/CheckForInMatch";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 export const GamePage = () => {
   // essentially we're gonna call to get the information of the match using the details loaded
   // from local host and the context
@@ -40,7 +37,8 @@ export const GamePage = () => {
   const matchCtx = useMatchCtx();
   const [countdown, setCountdown] = useState(false);
   const [matchOver, setMatchOver] = useState(false);
-
+  const navigate = useNavigate();
+  const location = useLocation();
   const {
     loading,
     matchInfo,
@@ -58,9 +56,14 @@ export const GamePage = () => {
   } = state;
   const { connectionRef } = useSignalR();
   const timeSentRef = useRef(false);
+  const matchInfoRef = useRef(matchInfo);
+  useEffect(() => {
+    matchInfoRef.current = matchInfo;
+  }, [matchInfo]);
   function gameReducer(state: GameState, action: GameAction): GameState {
     switch (action.type) {
       case "INIT_MATCH_SUCCESS":
+        console.log("Game action: ", action);
         const {
           matchInfo,
           currentStageNum,
@@ -70,6 +73,12 @@ export const GamePage = () => {
           onLoadTime,
         } = action.payload;
 
+        console.log(
+          "Minigame order: ",
+          minigameOrder,
+          " current stage num: ",
+          currentStageNum,
+        );
         return {
           ...state,
           loading: false,
@@ -115,16 +124,22 @@ export const GamePage = () => {
     }
   }
 
+  // useEffect for player loading back into game on reconnecting
+  useEffect(() => {
+    if (location.state) {
+      dispatch({ type: "INIT_MATCH_SUCCESS", payload: location.state.payload });
+    }
+  }, [location]);
+
   // initial useEffect for retrieving information about the match
   useEffect(() => {
-    const problemSetId = matchCtx.problemSetId;
     const onLoadTime = Math.floor(performance.now()); // time that loaded into match
     const matchInformation = authorizedCall(
       authCtx,
       "GET",
       "getMatchInfoForPlayer",
       "P",
-      { problemSetId },
+      null,
     );
 
     matchInformation.then((result) => {
@@ -166,10 +181,21 @@ export const GamePage = () => {
     return () => {
       if (timeSentRef.current) return;
       timeSentRef.current = true;
-      const previousTime = matchInfo?.[`time:${authCtx.UID}`] ?? 0;
+      const previousTime = matchInfoRef.current?.[`time:${authCtx.UID}`] ?? 0;
       const currTime = Math.floor(performance.now());
 
-      const newTime = previousTime + (currTime - onLoadTime); // total time in game
+      const newTime = Number(previousTime) + (currTime - onLoadTime); // total time in game
+
+      console.log(
+        "Dismounting... PREVTIME: ",
+        previousTime,
+        " currTime: ",
+        currTime,
+        " onLoadTime: ",
+        onLoadTime,
+        " newTime: ",
+        newTime,
+      );
       // updates the current time for the player in the redis hash
       authorizedCall(authCtx, "POST", "editPlayerTime", "P", {
         uid: authCtx.UID,
@@ -194,6 +220,12 @@ export const GamePage = () => {
     }
 
     const fetchQuestionData = async () => {
+      if (matchCtx.problemSetId == "") {
+        console.log("Problem set ID is null...");
+        navigate("/home");
+        return;
+      }
+
       const currentQuestion = questionOrder.split("_")[currentStage];
 
       const result = await authorizedCall(
@@ -233,6 +265,7 @@ export const GamePage = () => {
     fullAnswerOrder,
     minigameOrder,
     currentMinigameNumber,
+    location,
   ]);
 
   // this one just updates the game page to be for win whenever the matchCtx changes from signalR
@@ -333,7 +366,8 @@ export const GamePage = () => {
     const sessionMs =
       onLoadTime > 0 ? Math.floor(performance.now()) - onLoadTime : 0;
     const totalTimeMs =
-      (matchInfo?.[`time:${authCtx.UID}` as `time:${string}`] ?? 0) + sessionMs;
+      Number(matchInfo?.[`time:${authCtx.UID}` as `time:${string}`] ?? 0) +
+      sessionMs;
     return (
       <MatchResultScreen won={matchCtx.wonMatch} totalTimeMs={totalTimeMs} />
     );
@@ -347,7 +381,12 @@ export const GamePage = () => {
     console.log("Loading...!");
     console.log("QUESTION INFORMATION: ", questionInformation);
 
-    return <div>Loading...</div>;
+    return (
+      <div className="relative h-full w-full flex items-center justify-center">
+        <CheckForInMatch />
+        <div>Loading...</div>
+      </div>
+    );
   }
 
   // uses player's current level to get the game they should be playing

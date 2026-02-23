@@ -27,6 +27,16 @@
   },
   {
     "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "CheckForPlayerInMatch",
+    "RelativePath": "checkForPlayerInMatch",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
     "Method": "EditPlayerLevel",
     "RelativePath": "editPlayerLevel",
     "HttpMethod": "POST",
@@ -55,6 +65,16 @@
         "IsRequired": false
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "GetLevelForPlayer",
+    "RelativePath": "getLevelForPlayer",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

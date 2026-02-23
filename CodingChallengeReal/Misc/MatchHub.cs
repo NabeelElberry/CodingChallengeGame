@@ -39,95 +39,13 @@ namespace CodingChallengeReal.Misc
             }
         }
 
-        const string lua_script = @"
-        -- KEYS = { queueKey}
-        -- ARGV = { playerId }
-           
-        local key = KEYS[1]
-        -- whether or not the user declined
-        local accepted = ARGV[1]    
-        
-        if redis.call('HEXISTS', key, 'init') == 0 then
-            redis.call('HSET', key, 'init', 2)
-        end
-        local getKey = tonumber(redis.call('HGET', key, 'init'))
 
-    
-        -- case where someone else before you declined
-        if getKey == -10 then
-            return 'declined'
-        end
-
-        if accepted == 'false' or accepted == 'False' or not accepted then
-
-            if getKey == 1 then
-                return 'accepted_declined'
-            else 
-                redis.call('HSET', key, 'init', -10)
-                return 'declined_first'
-            end
-            
-        else
-            
-            if getKey == 2 then
-                -- decrements by 1
-                redis.call('HINCRBY', key, 'init', -1)
-                return 'first_accepted'
-            elseif getKey == 1 then
-                return 'make_match'
-            end
-        end
-
-        ";
-
-        const string checkIfInitiator = @"
-        -- KEYS = {playerId}
-        
-        local playerId = KEYS[1]
-
-        local returnVal = redis.call('SISMEMBER', 'initiators', playerId)
-    
-        return returnVal;
-        ";
-
-
-        const string getOpposingPlayerByPlayer = @"
-        -- KEYS = { matchKey }
-
-        local userIdKey = KEYS[1]
-        return redis.call('HGET', 'match_pairs', userIdKey)
-        ";
-
-        const string removeTracesFromRedis = @"
-        -- KEYS = {uid1, uid2, togetherKey}
-
-        local uid1 = KEYS[1]
-        local uid2 = KEYS[2]
-        local tgtKey = KEYS[3]
-
-        -- deleting from match pairs
-        redis.call('HDEL', 'match_pairs', uid1)
-        redis.call('HDEL', 'match_pairs', uid2)
-        
-        -- deleting from initiators
-        if redis.call('SISMEMBER', 'initiators', uid1) == 1 then
-            redis.call('SREM', 'initiators', uid1) 
-        else 
-            redis.call('SREM', 'initiators', uid2) 
-        end
-
-        -- deleting from all_matched
-        redis.call('SREM', 'all_matched', uid1)
-        redis.call('SREM', 'all_matched', uid2)        
-
-        redis.call('DEL', tgtKey)
-        ";
 
 
        
-        private async Task RemoveInformationFromRedisOnDecline(string uid1, string uid2)
+        private async Task RemoveInformationFromRedis(string uid1, string uid2)
         {
-            await _redis.ScriptEvaluateAsync(removeTracesFromRedis, new RedisKey[] { uid1, uid2, Key(uid1, uid2) });
+            await _redis.ScriptEvaluateAsync(LuaScripts.removeTracesFromRedis, new RedisKey[] { uid1, uid2, Key(uid1, uid2) });
         }
 
         public async Task JoinMatchRoom(bool accepted, Guid problemSetId)
@@ -139,7 +57,7 @@ namespace CodingChallengeReal.Misc
                 Console.WriteLine("Unverified User");
                 throw new HubException("Unauthenticated");
             }
-            var opponentId = (await _redis.ScriptEvaluateAsync(getOpposingPlayerByPlayer, new RedisKey[] { userId })).ToString();
+            var opponentId = (await _redis.ScriptEvaluateAsync(LuaScripts.getOpposingPlayerByPlayer, new RedisKey[] { userId })).ToString();
             Console.WriteLine($"UID: {userId} OID: {opponentId}" );
             var key = Key(userId, opponentId);
             await Groups.AddToGroupAsync(Context.ConnectionId, key);
@@ -158,7 +76,7 @@ namespace CodingChallengeReal.Misc
             // if declined_early or declined, send one to EACH caller, not both
             // if accepted_declined, then send a signal out to BOTH that it's declined.
 
-            var scriptResult = await _redis.ScriptEvaluateAsync(lua_script, new RedisKey[] { key }, new RedisValue[] { accepted ? "true" : "false"});
+            var scriptResult = await _redis.ScriptEvaluateAsync(LuaScripts.lua_script, new RedisKey[] { key }, new RedisValue[] { accepted ? "true" : "false"});
             var scriptResultString = scriptResult.ToString();
             Console.WriteLine($"Script Result {scriptResult.ToString()}");
             if (scriptResultString.Equals("make_match"))
@@ -182,7 +100,7 @@ namespace CodingChallengeReal.Misc
                 await Clients.Group(key).SendAsync("MatchDeclined"); // send to EACH CALLER
         
                 Console.WriteLine("Match declined");
-                await RemoveInformationFromRedisOnDecline(userId, opponentId);
+                await RemoveInformationFromRedis(userId, opponentId);
 
 
             }
@@ -190,75 +108,12 @@ namespace CodingChallengeReal.Misc
             { 
                 await Clients.Group(key).SendAsync("MatchDeclined"); // send to BOTH
                 Console.WriteLine("Match declined in accepted_declined");
-                await RemoveInformationFromRedisOnDecline(userId, opponentId);
+                await RemoveInformationFromRedis(userId, opponentId);
             } else // first_accepted, don't do anything
             {
                 Console.WriteLine("First accepted");
             }
         }
-
-
-        // lowkey we could organize this better,
-        // having a hash where each key is a table in the hash would reduce the clutter in the main part of redis
-
-
-        /// <summary>
-        /// Essentially what this does is it adds a key into the redis table with user1:user2 and a value that goes up to 2
-        /// However, once this is done we really should delete it since there's no point,
-        /// 
-        /// </summary>
-        /// <param name="matchId"></param>
-        /// <param name="user1id"></param>
-        /// <param name="user2id"></param>
-        /// <param name="response"></param>
-        /// <returns></returns>
-        //public async Task AcceptOrDecline(string matchId, string user1id, string user2id, bool response)
-        //{
-        //    Console.WriteLine("In accept/decline");
-
-        //    var key = Key(user1id, user2id); // key for our redis list
-        //    var keyValue = await _redis.StringGetAsync(key);
-        //    var amount = 0;
-        //    keyValue.TryParse(out amount);
-        //    await Groups.AddToGroupAsync(Context.ConnectionId, matchId);
-        //    // if it's our first acceptance or decline, initialize the key to 2
-        //    if (keyValue == RedisValue.Null)
-        //    {
-        //        await _redis.HashSetAsync(Key(user1id, user2id), "init", 2);
-        //    }
-
-        //    if (keyValue.IsInteger && amount == -10) // opponent declined already (not you)
-        //    {
-        //        await Clients.Caller.SendAsync("MatchDeclined");
-        //    } 
-
-
-        //    if (response) // accepted just decrement the key
-        //    {
-        //        await _redis.HashDecrementAsync(key, "init");
-        //    } else // declined, set the value into the negatives
-        //    {
-                
-        //        if (keyValue == 1) // someone accepted, but you declined, so send a negative response to both
-        //        {
-        //            await Clients.Group(matchId).SendAsync("MatchDeclined");
-        //        }
-        //        else
-        //        {
-        //            await _redis.HashSetAsync(key, "init", -10);
-        //            await Clients.Caller.SendAsync("MatchDeclined");
-        //        }
-        //    }
-
-        //    // case where we should make the match
-        //    // communicate with the DB, and communicate with players that match has been accepted
-        //    if (await _redis.HashGetAsync(key, "init") == 0)
-        //    {
-        //        await Clients.Group(matchId).SendAsync("MatchAccepted");
-        //    }
-        //}
-
-
         /// <summary>
         /// Receives signal from frontend that updates both clients when the match is over
         /// 
@@ -280,6 +135,8 @@ namespace CodingChallengeReal.Misc
                 string matchKey = Key(winningUserId, opposingUserId);
                 await Clients.User(winningUserId).SendAsync("MatchWinner");
                 await Clients.User(opposingUserId).SendAsync("MatchLoser");
+
+                await RemoveInformationFromRedis(winningUserId, opposingUserId);
             }
         }
 

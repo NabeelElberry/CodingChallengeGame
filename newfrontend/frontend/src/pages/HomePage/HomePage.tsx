@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { SlActionUndo } from "react-icons/sl";
 import CustomButton from "../../components/Button";
@@ -7,6 +7,7 @@ import { useAuth } from "../../store/AuthCtx";
 import { jwtDecode } from "jwt-decode";
 import { useMatchCtx } from "../../store/MatchCtx";
 import { QueuePopInternal } from "../../components/QueuePopInternal";
+import { CheckForInMatch } from "../../components/CheckForInMatch";
 
 import useSignalR from "../../hooks/useSignalR";
 import authorizedCall from "../../misc/authorizedCall";
@@ -24,6 +25,125 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Select } from "@mantine/core";
 
+const BackgroundParticle = ({
+  delay,
+  x,
+  size,
+  duration,
+  drift,
+}: {
+  delay: number;
+  x: number;
+  size: number;
+  duration: number;
+  drift: number;
+}) => (
+  <motion.div
+    initial={{ y: "108vh", opacity: 0, scale: 0, x: 0 }}
+    animate={{
+      y: ["108vh" as unknown as number, "-20vh" as unknown as number],
+      opacity: [0, 1, 1, 0],
+      scale: [0, 1, 1, 0],
+      x: [0, drift, -drift * 0.5, drift * 0.3],
+    }}
+    transition={{
+      duration,
+      delay,
+      repeat: Infinity,
+      repeatDelay: 0.5 + (x % 3),
+      ease: "easeOut",
+    }}
+    style={{
+      position: "fixed",
+      left: `${x}%`,
+      bottom: 0,
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "50%",
+      background: "radial-gradient(circle, #c4b5fd 0%, #6662FF 60%)",
+      boxShadow: `0 0 ${size * 3}px #6662FF, 0 0 ${size * 6}px rgba(102,98,255,0.6), 0 0 ${size * 10}px rgba(102,98,255,0.25)`,
+      pointerEvents: "none",
+      zIndex: 10,
+    }}
+  />
+);
+
+const AmbientOrb = ({
+  x,
+  y,
+  size,
+  delay,
+}: {
+  x: number;
+  y: number;
+  size: number;
+  delay: number;
+}) => (
+  <motion.div
+    animate={{
+      x: [0, 50, -35, 25, 0],
+      y: [0, -40, 25, -20, 0],
+      opacity: [0.18, 0.38, 0.22, 0.32, 0.18],
+    }}
+    transition={{
+      duration: 14 + delay * 3,
+      delay,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+    style={{
+      position: "fixed",
+      left: `${x}%`,
+      top: `${y}%`,
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "50%",
+      background: "rgba(102,98,255,0.45)",
+      filter: `blur(${size * 0.38}px)`,
+      transform: "translate(-50%, -50%)",
+      pointerEvents: "none",
+      zIndex: 2,
+    }}
+  />
+);
+
+const StarParticle = ({
+  x,
+  y,
+  delay,
+  size,
+}: {
+  x: number;
+  y: number;
+  delay: number;
+  size: number;
+}) => (
+  <motion.div
+    animate={{
+      opacity: [0.2, 0.85, 0.2],
+      scale: [0.7, 1.6, 0.7],
+    }}
+    transition={{
+      duration: 2 + (y % 3),
+      delay,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+    style={{
+      position: "fixed",
+      left: `${x}%`,
+      top: `${y}%`,
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "50%",
+      background: "#a78bfa",
+      boxShadow: `0 0 ${size * 4}px rgba(167,139,250,0.9), 0 0 ${size * 8}px rgba(102,98,255,0.5)`,
+      pointerEvents: "none",
+      zIndex: 6,
+    }}
+  />
+);
+
 export const HomePage = () => {
   return (
     <div className="h-full bg-navbar-bg flex items-center justify-center overflow-hidden">
@@ -33,6 +153,39 @@ export const HomePage = () => {
 };
 
 export const HomeBody = () => {
+  const bgParticles = useMemo(
+    () =>
+      Array.from({ length: 22 }, (_, i) => ({
+        delay: i * 0.35,
+        x: 2 + i * 4.5,
+        size: 7 + (i % 4) * 4,
+        duration: 3.5 + (i % 4),
+        drift: ((i % 5) - 2) * 35,
+      })),
+    [],
+  );
+
+  const starParticles = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, i) => ({
+        x: (i * 37 + 7) % 97,
+        y: (i * 53 + 11) % 93,
+        delay: i * 0.15,
+        size: i % 3 === 0 ? 5 : 3,
+      })),
+    [],
+  );
+
+  const ambientOrbs = useMemo(
+    () => [
+      { x: 18, y: 28, size: 280, delay: 0 },
+      { x: 78, y: 18, size: 220, delay: 4 },
+      { x: 52, y: 72, size: 320, delay: 7 },
+      { x: 88, y: 62, size: 200, delay: 2 },
+    ],
+    [],
+  );
+
   // contexts
   const authCtx = useAuth();
   const matchCtx = useMatchCtx();
@@ -48,6 +201,7 @@ export const HomeBody = () => {
   const [queueVisible, setQueueVisible] = useState(false);
   const [matchFound, setMatchFound] = useState(false);
   const [userAccepted, setUserAccepted] = useState(false);
+  const [isQueuing, setIsQueuing] = useState(false);
   const [selectedProblemSet, setSelectedProblemSet] = useState<string | null>(
     "",
   );
@@ -110,6 +264,7 @@ export const HomeBody = () => {
   };
 
   const startQueue = async (mode: string) => {
+    setIsQueuing(true);
     const token = await authCtx.user?.getIdToken();
     if (token) {
       const decodedToken = jwtDecode<FirebaseJwtPayload>(token);
@@ -130,8 +285,17 @@ export const HomeBody = () => {
         setUserAccepted(false);
         matchCtx.setMatchStatus("NONE");
         setMatchFound(true);
+      } else {
+        setIsQueuing(false);
       }
+    } else {
+      setIsQueuing(false);
     }
+  };
+
+  const cancelQueue = async () => {
+    await authorizedCall(authCtx, "POST", "dequeueUser", "P", null);
+    setIsQueuing(false);
   };
 
   const SelectButton = ({
@@ -141,9 +305,9 @@ export const HomeBody = () => {
   }: SelectButtonProps) => {
     return (
       <motion.button
-        disabled={selectedSequence.includes(buttonChosen)}
+        disabled={selectedSequence.includes(buttonChosen) || isQueuing}
         onClick={() => updateSelectedButtons(buttonChosen)}
-        className={`bg-text-color text-button-text rounded-2xl 
+        className={`bg-text-color text-button-text rounded-2xl
         duration-500 flex items-center justify-center text-center
         hover:cursor-pointer hover:text-white
         ${
@@ -154,13 +318,29 @@ export const HomeBody = () => {
             : largeClass
         }
         `}
+        style={{
+          boxShadow: selectedSequence.includes(buttonChosen)
+            ? "0 0 18px rgba(102,98,255,0.65), 0 0 36px rgba(102,98,255,0.3), inset 0 0 18px rgba(102,98,255,0.12)"
+            : "0 0 14px rgba(102,98,255,0.45), 0 0 28px rgba(102,98,255,0.2)",
+          opacity:
+            isQueuing && !selectedSequence.includes(buttonChosen) ? 0.3 : 1,
+          transition: "opacity 0.4s ease",
+        }}
         animate={
           currentlySelected == buttonChosen
             ? {
-                scale: [1.3, 1.0],
-                transition: { duration: 0.2, times: [0.7, 1] },
+                scale: [1.1, 1.0],
+                transition: { duration: 0.5, times: [0.7, 1] },
               }
             : { scale: 1 }
+        }
+        whileHover={
+          !selectedSequence.includes(buttonChosen) && !isQueuing
+            ? {
+                boxShadow:
+                  "0 0 20px rgba(102,98,255,0.7), 0 0 40px rgba(102,98,255,0.35)",
+              }
+            : {}
         }
       >
         <motion.span
@@ -206,7 +386,30 @@ export const HomeBody = () => {
   };
 
   return (
-    <div className="h-full w-full bg-navbar-bg flex items-center justify-center overflow-hidden">
+    <div
+      className="h-full w-full flex items-center justify-center overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(ellipse at 50% 50%, #1a1535 0%, #110e1e 55%, #0d0d0d 100%)",
+      }}
+    >
+      {ambientOrbs.map((o, i) => (
+        <AmbientOrb key={i} x={o.x} y={o.y} size={o.size} delay={o.delay} />
+      ))}
+      {starParticles.map((s, i) => (
+        <StarParticle key={i} x={s.x} y={s.y} delay={s.delay} size={s.size} />
+      ))}
+      {bgParticles.map((p, i) => (
+        <BackgroundParticle
+          key={i}
+          delay={p.delay}
+          x={p.x}
+          size={p.size}
+          duration={p.duration}
+          drift={p.drift}
+        />
+      ))}
+      {!matchFound && <CheckForInMatch />}
       {matchFound && (
         <QueuePopInternal
           isDeclined={matchCtx.matchStatus === "DECLINED"}
@@ -215,7 +418,7 @@ export const HomeBody = () => {
           onDecline={() => sendMatchSignal(false)}
         />
       )}
-      <div className="relative inline-block">
+      <div className="relative inline-block" style={{ zIndex: 20 }}>
         <div className="flex flex-row w-full items-end">
           <button
             onClick={() => handleBackLogic()}
@@ -306,19 +509,131 @@ export const HomeBody = () => {
               </div>
 
               {queueVisible && (
-                <motion.div>
+                <motion.div className="flex flex-col items-center gap-5">
                   <CustomButton
                     className="w-300 h-40"
                     tailwindTextSize={"text-4xl"}
                     pulse
                     onClick={async () =>
-                      await startQueue(
+                      !isQueuing &&
+                      (await startQueue(
                         casualCompVisible == 1 ? "casual" : "competitive",
-                      )
+                      ))
                     }
                   >
                     QUEUE
                   </CustomButton>
+
+                  <AnimatePresence>
+                    {isQueuing && (
+                      <motion.div
+                        key="searching"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex flex-col items-center gap-4"
+                      >
+                        {/* Spinning radar rings */}
+                        <div className="relative w-20 h-20 flex items-center justify-center">
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              borderRadius: "50%",
+                              border: "3px solid transparent",
+                              borderTopColor: "#6662FF",
+                              borderRightColor: "rgba(102,98,255,0.35)",
+                              boxShadow: "0 0 12px rgba(102,98,255,0.5)",
+                            }}
+                          />
+                          <motion.div
+                            animate={{ rotate: -360 }}
+                            transition={{
+                              duration: 3.2,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
+                            style={{
+                              position: "absolute",
+                              inset: "9px",
+                              borderRadius: "50%",
+                              border: "2px solid transparent",
+                              borderTopColor: "#a78bfa",
+                              borderRightColor: "rgba(167,139,250,0.25)",
+                            }}
+                          />
+                          <motion.div
+                            animate={{
+                              opacity: [0.5, 1, 0.5],
+                              scale: [0.8, 1.15, 0.8],
+                            }}
+                            transition={{
+                              duration: 1.4,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                            style={{
+                              width: "10px",
+                              height: "10px",
+                              borderRadius: "50%",
+                              background: "#6662FF",
+                              boxShadow:
+                                "0 0 14px #6662FF, 0 0 28px rgba(102,98,255,0.55)",
+                            }}
+                          />
+                        </div>
+
+                        <motion.p
+                          animate={{ opacity: [0.55, 1, 0.55] }}
+                          transition={{
+                            duration: 1.8,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                          }}
+                          style={{
+                            color: "#a78bfa",
+                            fontSize: "13px",
+                            letterSpacing: "4px",
+                            textTransform: "uppercase",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          SEARCHING FOR MATCH...
+                        </motion.p>
+
+                        <motion.button
+                          onClick={cancelQueue}
+                          whileHover={{
+                            scale: 1.05,
+                            boxShadow: "0 0 18px rgba(239,68,68,0.45)",
+                          }}
+                          whileTap={{ scale: 0.96 }}
+                          style={{
+                            background: "rgba(239,68,68,0.1)",
+                            border: "1px solid rgba(239,68,68,0.35)",
+                            borderRadius: "12px",
+                            padding: "10px 36px",
+                            color: "rgba(239,68,68,0.8)",
+                            fontSize: "12px",
+                            letterSpacing: "3px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          CANCEL
+                        </motion.button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )}
             </LayoutGroup>

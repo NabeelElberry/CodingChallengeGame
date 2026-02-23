@@ -1,6 +1,7 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model.Internal.MarshallTransformations;
 using CodingChallengeReal.DTO;
+using CodingChallengeReal.Misc;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 
@@ -16,60 +17,7 @@ namespace CodingChallengeReal.Services
             _redis = redisConnection.GetDatabase();
         }
 
-        const string lua = @"
-        -- KEYS = { queueKey, matchedSetKey, matchHashKey }
-        -- ARGV = { playerId }
 
-        local queueKey   = KEYS[1]
-        local matchedSet = KEYS[2] -- stores all users
-        local matchHash  = KEYS[3] -- stores user pairs
-        local me         = ARGV[1]
-
-        -- 0) If I'm marked busy (initiator from a previous match), don't requeue.
-        if redis.call('SISMEMBER', matchedSet, me) == 1 then
-          redis.call('LREM', queueKey, 0, me)
-          return { 'busy'}
-        end
-
-        -- 1) If someone already paired me, I'm the joiner.
-        local theirOpp = redis.call('HGET', matchHash, me)
-        if theirOpp then -- mark me busy
-          redis.call('LREM', queueKey, 0, me)
-          redis.call('SADD', matchedSet, me)
-          return { 'joiner', theirOpp }
-        end
-
-        -- 2) Not enough people in line
-        if redis.call('LLEN', queueKey) < 2 then
-          return nil
-        end
-
-        -- 3) Remove me so I don't self-match
-        redis.call('LREM', queueKey, 0, me)
-
-        -- 4) Try to pop an opponent
-        local opp = redis.call('RPOP', queueKey)
-        if opp then
-          -- Opponent must not be busy (initiator elsewhere) and must not be hash-paired already
-          if redis.call('SISMEMBER', matchedSet, opp) == 0 and redis.call('HEXISTS', matchHash, opp) == 0 then
-            -- Mark ONLY ME (initiator) busy
-            redis.call('SADD', matchedSet, me)
-            -- Record pairing both ways
-            redis.call('HSET', matchHash, me, opp, opp, me)
-            -- Ensure opp not lingering in queue
-            redis.call('LREM', queueKey, 0, opp)
-            redis.call('SADD', 'initiators', me) -- adding myself to a set of initiators
-            return { 'initiator', opp }
-          else
-            -- Put them back if they were busy/paired
-            redis.call('RPUSH', queueKey, opp)
-          end
-        end
-
-        -- 5) Nothing to do
-        return nil
-
-        ";
 
 
         public async Task<MatchResultDTO?> AttemptMatchPlayer(
@@ -90,7 +38,7 @@ namespace CodingChallengeReal.Services
             var minElo = 0;
             var loopNumber = 1;
 
-            await _redis.ListLeftPushAsync(queueKey, playerId);
+            await _redis.ListLeftPushAsync(queueKey, playerId); // add the player to the elo at the left of the list
             Console.WriteLine($"Pushing {queueKey} with id: {playerId}");
             // will keep running until the time per bucket is done, 
             while (minBucket-(loopNumber*100) > minElo || maxBucket+(loopNumber*100) < maxElo)
@@ -149,7 +97,7 @@ namespace CodingChallengeReal.Services
             var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(timeToCheck);
             while (result.IsNullOrEmpty() && DateTime.UtcNow < deadline)
             {
-                var scriptResult = await _redis.ScriptEvaluateAsync(lua, // arguments for the script
+                var scriptResult = await _redis.ScriptEvaluateAsync(LuaScripts.makeMatchScript, // arguments for the script
                     new RedisKey[] { queueKey, matchedSet, matchedHashmap }, // keys
                     new RedisValue[] { playerId } // player queueing
                 );

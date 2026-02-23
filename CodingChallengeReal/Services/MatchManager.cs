@@ -23,102 +23,7 @@ namespace CodingChallengeReal.Services
             _problemSetRepository = problemSetRepository;
         }
 
-        const string luaInsertScript = @"
-        -- KEYS = { queueKey, matchedSetKey, matchHashKey }
-
-
-        local matchKey   = KEYS[1] -- match key as set
-        local playerOneId = ARGV[1]
-        local playerTwoId  = ARGV[2]
-        local minigameOrder = ARGV[3]
-        local questionOrder = ARGV[4]
-        local problemSetId = ARGV[5]
-        local gameAnswerOrder = ARGV[6]
-
-        -- logic is simple, just make a list with matchKey as the list name, and two values inside it 
-        -- structure looks like this: List: {matchKey} Values: {playerOneId-
-
-        redis.call('HSET', matchKey, 'level:' ..  playerOneId, 0, 'level:' .. playerTwoId, 0, 'minigameOrder', minigameOrder, 'time:' .. playerOneId, 0, 'time:' .. playerTwoId, 0, 'questionOrder', questionOrder, 'problemSetId', problemSetId, 'fullAnswerOrder', gameAnswerOrder)
-        return true;
-
-";
-
-        const string luaEditLevelScript = @"
-        -- KEYS = { queueKey, matchedSetKey, matchHashKey }
-
-        local matchKey   = KEYS[1] -- match key as set
-        local playerId = ARGV[1]
-        local newValue  = ARGV[2]
-
-        -- logic is simple, edits the field to be whatever new value
-    
-        local prevVal = redis.call('HGET', matchKey, 'level:' .. playerId)
-        
-        redis.call('HSET', matchKey, 'level:' ..  playerId, prevVal + newValue)
-        return true;
-";
-
-
-        const string luaEditTimeScript = @"
-        -- KEYS = { queueKey, matchedSetKey, matchHashKey }
-
-        local matchKey   = KEYS[1] -- match key as set
-        local playerId = ARGV[1]
-        local newValue  = ARGV[2]
-
-        -- logic is simple, edits the field to be whatever new value
-
-        redis.call('HSET', matchKey, 'time:' ..  playerId, newValue)
-        return true;
-";
-
-
-        const string luaGetLevelAndGameOrderScript = @"
-        -- KEYS = { queueKey, matchedSetKey, matchHashKey }
- 
-
-        local matchKey = KEYS[1] -- match key as set
-        local playerId = ARGV[1]
-        local returnArr = {}
-
-        -- Gets an array with index 1 as level, index 2 is order of game
-        
-        returnArr[1] = redis.call('HGET', matchKey, 'level:' ..  playerId)
-        returnArr[2] = redis.call('HGET', matchKey, 'minigameOrder')
-        return returnArr;";
-
-        const string luaGetTimeScript = @"
-        -- KEYS = { queueKey, matchedSetKey, matchHashKey }
- 
-
-        local matchKey = KEYS[1] -- match key as set
-        local playerId = ARGV[1]
-        local returnArr = {}
-
-        -- logic is simple, edits the field to be whatever new value
-        
-        local time = redis.call('HGET', matchKey, 'time:' ..  playerId)
-        
-        return time;";
-
-
-
-        const string checkIfInitiator = @"
-        -- KEYS = {playerId}
-        
-        local playerId = KEYS[1]
-
-        local returnVal = redis.call('SISMEMBER', 'initiators', playerId)
-    
-        return returnVal;
-        ";
-
-        const string checkIfRedisHashPopulated = @"
-        -- KEYS = { matchKey }
-
-        local matchKey = KEYS[1]
-        return redis.call('HEXISTS', matchKey, 'minigameOrder')
-        ";
+       
 
         /// <summary>
         /// Run this when a game is created, makes a redis hash which sets both players level to 0. 
@@ -291,7 +196,7 @@ namespace CodingChallengeReal.Services
             // removing last underscore from minigame order string
             minigameOrderString = minigameOrderString.TrimEnd('_');
 
-            var scriptResult = await _redis.ScriptEvaluateAsync(luaInsertScript, // arguments for the script
+            var scriptResult = await _redis.ScriptEvaluateAsync(LuaScripts.luaInsertScript, // arguments for the script
                     new RedisKey[] { matchId }, // key
                     new RedisValue[]
                     {
@@ -317,7 +222,7 @@ namespace CodingChallengeReal.Services
             var opponent = await GetPartner(playerId);
             var matchId = Util.Key(playerId, opponent);
 
-            var scriptResult = await _redis.ScriptEvaluateAsync(luaEditLevelScript, // arguments for the script
+            var scriptResult = await _redis.ScriptEvaluateAsync(LuaScripts.luaEditLevelScript, // arguments for the script
                 new RedisKey[] { matchId }, // key
                 new RedisValue[] { playerId, newValue.ToString() } // args
             );
@@ -336,7 +241,7 @@ namespace CodingChallengeReal.Services
             var opponent = await GetPartner(playerId);
             var matchId = Util.Key(playerId, opponent);
             Console.WriteLine("Edit time manager");
-            var scriptResult = await _redis.ScriptEvaluateAsync(luaEditTimeScript, // arguments for the script
+            var scriptResult = await _redis.ScriptEvaluateAsync(LuaScripts.luaEditTimeScript, // arguments for the script
                 new RedisKey[] { matchId }, // key
                 new RedisValue[] { playerId, newValue.ToString() } // args
             );
@@ -355,7 +260,7 @@ namespace CodingChallengeReal.Services
             var opponent = await GetPartner(playerId);
             var matchId = Util.Key(playerId, opponent);
 
-            var scriptResult = await _redis.ScriptEvaluateAsync(luaGetLevelAndGameOrderScript, // arguments for the script
+            var scriptResult = await _redis.ScriptEvaluateAsync(LuaScripts.luaGetLevelAndGameOrderScript, // arguments for the script
                 new RedisKey[] { matchId }, // key
                 new RedisValue[]
                 {
@@ -375,7 +280,7 @@ namespace CodingChallengeReal.Services
             var opponent = await GetPartner(playerId);
             var matchId = Util.Key(playerId, opponent);
 
-            var scriptResult = await _redis.ScriptEvaluateAsync(luaGetTimeScript, // arguments for the script
+            var scriptResult = await _redis.ScriptEvaluateAsync(LuaScripts.luaGetTimeScript, // arguments for the script
                 new RedisKey[] { matchId }, // key
                 new RedisValue[]
                 {
@@ -399,10 +304,10 @@ namespace CodingChallengeReal.Services
             return !returnVal.IsNull ? returnVal.ToString() : null;
         }
 
-        public async Task<HashEntry[]> GetMatchInfoForPlayer(string uid, Guid problemSetId)
+        public async Task<HashEntry[]> GetMatchInfoForPlayer(string uid)
         {
 
-            Console.WriteLine($"UID : {uid} Problem set ID: {problemSetId}");
+            Console.WriteLine($"UID : {uid}");
             var partner = await GetPartner(uid);
             if (partner == null) return Array.Empty<HashEntry>();
 
@@ -420,6 +325,30 @@ namespace CodingChallengeReal.Services
 
             return await _redis.HashGetAllAsync(matchKey);
 
+        }
+
+        public async Task<bool> CheckIfPlayerInMatch(string uid)
+        {
+            var opponentId = (await _redis.ScriptEvaluateAsync(LuaScripts.getOpposingPlayerByPlayer, new RedisKey[] { uid })).ToString();
+            if (opponentId != null)
+            {
+                string key = Util.Key(uid, opponentId);
+                return await _redis.KeyExistsAsync(key);
+            }
+            
+            return false;
+        }
+
+        public async Task<string> GetLevelForPlayer(string uid)
+        {
+            var opponentId = (await _redis.ScriptEvaluateAsync(LuaScripts.getOpposingPlayerByPlayer, new RedisKey[] { uid })).ToString();
+            if (opponentId != null)
+            {
+                string key = Util.Key(uid, opponentId);
+                return (await _redis.ScriptEvaluateAsync(LuaScripts.getLevelForPlayer, new RedisKey[] {uid, key})).ToString();
+            }
+
+            return null;
         }
 
         private char getRandomLetter()
