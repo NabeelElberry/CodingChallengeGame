@@ -198,6 +198,18 @@
         }
       }
     },
+    "/cancelQueue": {
+      "post": {
+        "tags": [
+          "Match"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/Match/debug-claims": {
       "get": {
         "tags": [

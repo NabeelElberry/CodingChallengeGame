@@ -241,5 +241,8 @@
 
         return redis.call('HGET' tgtKey, levelKey)
         ";
+
+        public static string compQueue = "competitive_queue";
+        public static string casualQueue = "casual_queue";
     }
 }

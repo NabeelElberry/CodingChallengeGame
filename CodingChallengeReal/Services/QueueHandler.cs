@@ -2,23 +2,36 @@
 using Amazon.DynamoDBv2.Model.Internal.MarshallTransformations;
 using CodingChallengeReal.DTO;
 using CodingChallengeReal.Misc;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
+using System.CodeDom;
 
 namespace CodingChallengeReal.Services
 {
-    public class Matchmaker
+    public class QueueHandler
     {
 
         private readonly IDatabase _redis;
-
-        public Matchmaker(IConnectionMultiplexer redisConnection)
+        private readonly string InQueueStr = "ids_in_queue";
+        public QueueHandler(IConnectionMultiplexer redisConnection)
         {
             _redis = redisConnection.GetDatabase();
         }
 
 
-
+        private async Task<bool> CheckForCancellation(string playerId, string baseQueueKey)
+        {
+            bool inQueue = await _redis.SetContainsAsync(InQueueStr, playerId);
+            if (!inQueue)
+            {
+                Console.WriteLine($"Queue cancel received in AttemptMatchPlayer for : {playerId} in elo {baseQueueKey}");
+                // they're already removed from the compQueue hash in the cancel queue function
+                await _redis.ListRemoveAsync(baseQueueKey, playerId); // remove them from the queue
+                return true; // was removed from the queue so stop searching
+            }
+            return false;
+        }
 
         public async Task<MatchResultDTO?> AttemptMatchPlayer(
             int elo,
@@ -36,48 +49,56 @@ namespace CodingChallengeReal.Services
 
             var maxElo = 1000;
             var minElo = 0;
-            var loopNumber = 1;
+            var loopNumber = 2;
 
             await _redis.ListLeftPushAsync(queueKey, playerId); // add the player to the elo at the left of the list
-            Console.WriteLine($"Pushing {queueKey} with id: {playerId}");
+            await _redis.SetAddAsync(InQueueStr, playerId); // TODO: MAKE SURE TO CHANGE THIS TO BE DYNAMIC FOR CASUAL MODE
+
             // will keep running until the time per bucket is done, 
             while (minBucket-(loopNumber*100) > minElo || maxBucket+(loopNumber*100) < maxElo)
             {
+                // stop queueing in the big loop
+                bool cancelled = await CheckForCancellation(playerId, queueKey);
+                if (cancelled) return null;
 
-                Console.WriteLine($"Checking {queueKey}");
+                Console.WriteLine($"Checking {queueKey} for player: {playerId}");
                 // check for the default queue key first
-                var result = await CheckForMatch(queueKey, playerId, perBucketTimeout);
+                var result = await CheckForMatch(queueKey, playerId, perBucketTimeout, queueKey);
                 if (result != null)
                 {
-                    Console.WriteLine($"Found result in {queueKey}");
+                    Console.WriteLine($"Found result in {queueKey} for player: {playerId}");
                     return result; 
                 }
 
                 // go through all buckets starting from the closest ones, then up to the new max, which will increase by 100 everytime
                 // eg, elo is 550 => 500 => (500, 600) => ((500, 600), (400, 500), (600, 700)) => ((500,600), (400, 500), (600, 700), (300, 400), (700, 800)), etc...
-                for (int i = 0; i < loopNumber; i++) 
+                for (int i = 1; i < loopNumber; i++) 
                 {
-                    Console.WriteLine($"Checking {queueKeyUpper}...");
-                    if (maxBucket + (loopNumber * 100) <= 1000)
+                    // stop queueing in sub loops
+                    cancelled = await CheckForCancellation(playerId, queueKey);
+                    if (cancelled) return null;
+                    Console.WriteLine($"Current I: {i}, loopNumber: {loopNumber}");
+                    if (maxBucket + (i * 100) <= 1000)
                     {
-                        queueKeyUpper = $"elo_{minBucket + (loopNumber * 100)}_{maxBucket + (loopNumber * 100)}"; // key for the bucket
-                        result = await CheckForMatch(queueKeyUpper, playerId, perBucketTimeout);
+                        queueKeyUpper = $"elo_{minBucket + (i * 100)}_{maxBucket + (i * 100)}"; // key for the bucket
+                        Console.WriteLine($"Checking {queueKeyUpper} for player: {playerId}...");
+                        result = await CheckForMatch(queueKeyUpper, playerId, perBucketTimeout, queueKey);
                         if (result != null)
                         {
-                            Console.WriteLine($"Found result in {queueKeyUpper}");
+                            Console.WriteLine($"Found result in {queueKeyUpper}  for player: {playerId}");
                             return result;
                         }
                     }
 
-                    Console.WriteLine($"Checking {queueKeyLower}...");
-
-                    if (minBucket - (loopNumber * 100) >= 0)
+                    if (minBucket - (i * 100) > 0)
                     {
-                        queueKeyLower = $"elo_{minBucket - (loopNumber * 100)}_{maxBucket - (loopNumber * 100)}";
-                        result = await CheckForMatch(queueKeyLower, playerId, perBucketTimeout);
+                        
+                        queueKeyLower = $"elo_{minBucket - (i * 100)}_{maxBucket - (i * 100)}";
+                        Console.WriteLine($"Checking {queueKeyLower}  for player: {playerId}...");
+                        result = await CheckForMatch(queueKeyLower, playerId, perBucketTimeout, queueKey);
                         if (result != null)
                         {
-                            Console.WriteLine($"Found result in {queueKeyLower}");
+                            Console.WriteLine($"Found result in {queueKeyLower}  for player: {playerId}");
                             return result;
                         }
                     }
@@ -89,7 +110,7 @@ namespace CodingChallengeReal.Services
             return null;
         }
         
-        private async Task<MatchResultDTO> CheckForMatch(string queueKey, string playerId, int timeToCheck)
+        private async Task<MatchResultDTO> CheckForMatch(string queueKey, string playerId, int timeToCheck, string baseQueueKey)
         {
             var matchedSet = (RedisKey)"all_matched"; // matched set stores all users in a match
             var matchedHashmap = (RedisKey)"match_pairs"; // stores the pairs in match with each other
@@ -105,7 +126,10 @@ namespace CodingChallengeReal.Services
                 if (scriptResult.IsNull)
                 {
                     // No match yet—wait a bit before trying again
+                    bool cancelled = await CheckForCancellation(playerId, queueKey);
+                    if (cancelled) return null;
                     await Task.Delay(200);
+                    
                 } else
                 {
                     result = ((RedisResult[]?)scriptResult);
@@ -123,14 +147,20 @@ namespace CodingChallengeReal.Services
                 var opponent = (string)result[1];
 
                 Console.WriteLine($"Got something! role: {role} opponent {opponent}");
-
+                await _redis.SetRemoveAsync(InQueueStr, playerId); // removing from the comp queue
                 return new MatchResultDTO
                 {
                     Opponent = opponent,
                     IsInitiator = role == "initiator"
                 };
+                
             }
             return null; 
+        }
+
+        public async Task<bool> CancelPlayerQueue(string playerId) 
+        {
+            return await _redis.SetRemoveAsync(InQueueStr, playerId);
         }
     }
 }

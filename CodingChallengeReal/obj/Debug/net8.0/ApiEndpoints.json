@@ -27,6 +27,16 @@
   },
   {
     "ContainingType": "CodingChallengeReal.Controllers.MatchController",
+    "Method": "CancelQueue",
+    "RelativePath": "cancelQueue",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CodingChallengeReal.Controllers.MatchController",
     "Method": "CheckForPlayerInMatch",
     "RelativePath": "checkForPlayerInMatch",
     "HttpMethod": "GET",

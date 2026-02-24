@@ -24,7 +24,7 @@ namespace CodingChallengeReal.Controllers
         private readonly IMatchService _matchService;
         private readonly IHubContext<MatchHub> _matchHub;
         private readonly EnqueueService _enqueueService;
-        private readonly Matchmaker _matchmaker;
+        private readonly QueueHandler _queueHandler;
         private readonly IMatchRepository _matchRepository;
         private readonly IProblemSetRepository _questionRepository;
         private readonly IMapper _mapper;
@@ -33,7 +33,7 @@ namespace CodingChallengeReal.Controllers
 
 
 
-        public MatchController(IMatchRepository matchRepository, IMapper mapper, IProblemSetRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService, Matchmaker matchmaker,
+        public MatchController(IMatchRepository matchRepository, IMapper mapper, IProblemSetRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService, QueueHandler matchmaker,
             MatchManager matchManager)
         {
             _matchService = matchService;
@@ -42,7 +42,7 @@ namespace CodingChallengeReal.Controllers
             _matchRepository = matchRepository;
             _questionRepository = questionRepository;
             _mapper = mapper;
-            _matchmaker = matchmaker;
+            _queueHandler = matchmaker;
             _matchManager = matchManager;
         }
 
@@ -98,6 +98,10 @@ namespace CodingChallengeReal.Controllers
         {
 
             var userId = User.FindFirst("user_id").Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
             // TODO: COME BACK TO THIS
             if (mode == "casual") // casual mode doesn't need hard searching, slam everyone into the same redis queue and search from there
             {
@@ -108,7 +112,7 @@ namespace CodingChallengeReal.Controllers
             else
             { // need search matchmaking for competitive
                 MatchResultDTO? result = null;
-                result = await _matchmaker.AttemptMatchPlayer(mmr, userId);
+                result = await _queueHandler.AttemptMatchPlayer(mmr, userId);
 
                 if (result != null) // match was found, return true for initiator
                 {
@@ -138,6 +142,15 @@ namespace CodingChallengeReal.Controllers
 
             }
         }
+
+        [HttpPost]
+        [Route("/cancelQueue")]
+        public async Task<IActionResult> CancelQueue()
+        {
+            var userId = User.FindFirst("user_id").Value;
+            return Ok(await _queueHandler.CancelPlayerQueue(userId));
+        }
+
 
         [HttpGet("debug-claims")]
         public IActionResult DebugClaims()

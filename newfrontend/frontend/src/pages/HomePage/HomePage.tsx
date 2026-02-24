@@ -294,7 +294,7 @@ export const HomeBody = () => {
   };
 
   const cancelQueue = async () => {
-    await authorizedCall(authCtx, "POST", "dequeueUser", "P", null);
+    await authorizedCall(authCtx, "POST", "cancelQueue", "P", null);
     setIsQueuing(false);
   };
 
