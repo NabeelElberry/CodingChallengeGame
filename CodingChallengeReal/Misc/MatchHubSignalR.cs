@@ -12,14 +12,14 @@ using System.Runtime.InteropServices;
 namespace CodingChallengeReal.Misc
 {
     [Authorize]   
-    public class MatchHub: Hub
+    public class MatchHubSignalR: Hub
     {
         private readonly IMatchRepository _matchRepository;
         private readonly IDatabase _redis;
         private readonly IMatchService _matchService;
         private readonly MatchManager _matchManager;
         static string Key(string u1, string u2) => string.CompareOrdinal(u1, u2) < 0 ? $"{u1}:{u2}" : $"{u2}:{u1}";
-        public MatchHub(IMatchRepository matchRepository, IConnectionMultiplexer redisConnection, IMatchService matchService, MatchManager matchManager) {
+        public MatchHubSignalR(IMatchRepository matchRepository, IConnectionMultiplexer redisConnection, IMatchService matchService, MatchManager matchManager) {
             _matchRepository = matchRepository;
             _redis = redisConnection.GetDatabase();
             _matchService = matchService;
@@ -45,6 +45,7 @@ namespace CodingChallengeReal.Misc
        
         private async Task RemoveInformationFromRedis(string uid1, string uid2)
         {
+            Console.WriteLine($"UID: {uid1} UID2: {uid2} tgtKey: {Key(uid1, uid2)}");
             await _redis.ScriptEvaluateAsync(LuaScripts.removeTracesFromRedis, new RedisKey[] { uid1, uid2, Key(uid1, uid2) });
         }
 

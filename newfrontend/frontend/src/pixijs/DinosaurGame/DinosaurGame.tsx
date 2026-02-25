@@ -21,8 +21,17 @@ export default function DinosaurGame({
   answerOrder,
 }: gameWonInterface) {
   return (
-    <div className="w-[800px] h-[400px]">
-      <Application width={800} height={400} backgroundColor={"#ffffff"}>
+    <div
+      className="w-[800px] h-[400px]"
+      style={{
+        borderRadius: "12px",
+        overflow: "hidden",
+        border: "1px solid rgba(102,98,255,0.45)",
+        boxShadow:
+          "0 0 28px rgba(102,98,255,0.3), 0 0 56px rgba(102,98,255,0.12)",
+      }}
+    >
+      <Application width={800} height={400} backgroundColor={"#0d0b1a"}>
         <PixiContainer
           setGameWon={setGameWon}
           gameStatus={gameStatus}
@@ -63,7 +72,7 @@ const SmallTree = ({ x, y, width, height, ref }: xyInterface) => {
     // Load asset only once
     if (texture === Texture.EMPTY) {
       Assets.load("/src/assets/treepng.png").then((result) =>
-        setTexture(result)
+        setTexture(result),
       );
     }
   }, [texture]);
@@ -132,7 +141,7 @@ const PixiContainer = ({
 
   const jumpPower = -3;
   const gravity = 0.05;
-  const gameY = app.screen.height - 180;
+  const gameY = (app?.screen?.height ?? 400) - 180;
 
   // NOTE: When using useTick, mutable values accessed within should be refs or defined outside the component
   // if they don't need to be reactive. Since these need to be updated, they're defined outside as local vars.
@@ -253,11 +262,11 @@ const PixiContainer = ({
 
   return !loading ? (
     <pixiContainer>
-      {/* Ground Line for visual reference, if needed */}
+      {/* Ground Line */}
       <pixiGraphics
         draw={(g) => {
           g.clear();
-          g.lineStyle(2, 0x000000, 1);
+          g.lineStyle(2, 0x6662ff, 1);
           g.moveTo(0, gameY + 50);
           g.lineTo(app.screen.width, gameY + 50);
         }}
@@ -287,8 +296,7 @@ const PixiContainer = ({
               y={treeDimensions[1] / 2}
               anchor={0.5}
               text={treeValueRef[index].current!}
-              // Changed text fill to a visible color (e.g., black) since the main game text is now white
-              style={{ fill: "#000000", fontSize: 36, fontWeight: "bold" }}
+              style={{ fill: "#ffffff", fontSize: 36, fontWeight: "bold" }}
             />
           </pixiContainer>
         );

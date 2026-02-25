@@ -58,6 +58,7 @@ export type GameState = {
   gameOne: boolean;
   gameTwo: boolean;
   gameThree: boolean;
+  randomAnswerIndex: string;
 };
 
 export type GameAction =
@@ -70,6 +71,7 @@ export type GameAction =
         questionOrder: string;
         fullAnswerOrder: string;
         onLoadTime: number;
+        randomAnswerIndex: string;
       };
     }
   | {
@@ -86,4 +88,8 @@ export type GameAction =
     }
   | {
       type: "ADVANCE_STAGE";
+    }
+  | {
+      type: "MIX_QUESTION_ORDER";
+      payload: { questionInformation: Question };
     };

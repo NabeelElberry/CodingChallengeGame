@@ -213,6 +213,7 @@ export const HomeBody = () => {
       navigate("/match");
     }
     if (matchCtx.matchStatus == "DECLINED") {
+      setIsQueuing(false);
       const t = setTimeout(() => {
         setMatchFound(false);
         setUserAccepted(false);
@@ -511,8 +512,8 @@ export const HomeBody = () => {
               {queueVisible && (
                 <motion.div className="flex flex-col items-center gap-5">
                   <CustomButton
-                    className="w-300 h-40"
-                    tailwindTextSize={"text-4xl"}
+                    className="w-64 h-16 sm:w-80 sm:h-20 md:w-300 md:h-40"
+                    tailwindTextSize={"text-xl sm:text-2xl md:text-4xl"}
                     pulse
                     onClick={async () =>
                       !isQueuing &&

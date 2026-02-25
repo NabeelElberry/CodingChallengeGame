@@ -23,7 +23,7 @@ namespace CodingChallengeReal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddQuestionAsync(AddProblemSetDTO addQuestionRequest)
+        public async Task<IActionResult> AddQuestionAsync(AddProblemSetDTO addPSRequest)
         {
             var uid = User.FindFirst("user_id")?.Value;
             var email = User.FindFirst("email")?.Value;
@@ -31,11 +31,11 @@ namespace CodingChallengeReal.Controllers
 
             Console.WriteLine($"UID: {uid}, EMAIL: {email}, ROLE: {role}");
 
-            ProblemSet question = _mapper.Map<ProblemSet>(addQuestionRequest);
-            question.id = Guid.NewGuid().ToString();
-            await _problemSetRepository.AddAsync(question);
+            ProblemSet problemSet = _mapper.Map<ProblemSet>(addPSRequest);
+            problemSet.id = Guid.NewGuid().ToString();
+            await _problemSetRepository.AddAsync(problemSet);
 
-            return Ok(question);
+            return Ok(problemSet);
         }
 
         [HttpGet]

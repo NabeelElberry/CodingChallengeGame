@@ -15,8 +15,17 @@ export default function DragAndDropGame({
   answerOrder,
 }: gameWonInterface) {
   return (
-    <div className="w-[800px] h-[400px]">
-      <Application width={800} height={400} backgroundColor={"#ffffff"}>
+    <div
+      className="w-[800px] h-[400px]"
+      style={{
+        borderRadius: "12px",
+        overflow: "hidden",
+        border: "1px solid rgba(102,98,255,0.45)",
+        boxShadow:
+          "0 0 28px rgba(102,98,255,0.3), 0 0 56px rgba(102,98,255,0.12)",
+      }}
+    >
+      <Application width={800} height={400} backgroundColor={"#0d0b1a"}>
         <PixiContainer
           setGameWon={setGameWon}
           gameStatus={gameStatus}
@@ -78,7 +87,7 @@ const PixiContainer = ({
         answerPressed = true;
       } else {
         console.log(
-          `Pressed nothing, or wrong answer, correct answer is ${gameInformation.correctAnswer}`
+          `Pressed nothing, or wrong answer, correct answer is ${gameInformation.correctAnswer}`,
         );
       }
       // spacebar pressed
@@ -159,9 +168,8 @@ const PixiContainer = ({
             y={0}
             draw={(graphics) => {
               graphics.clear();
-              graphics.setFillStyle({ color: "red" });
               graphics.roundRect(0, 0, rectW, rectH);
-              graphics.fill("#ffff2f");
+              graphics.fill("#6662FF");
             }}
             eventMode="static"
           />
@@ -171,7 +179,7 @@ const PixiContainer = ({
             y={rectH / 2}
             anchor={0.5}
             text={stringValueRefArray[index].current!}
-            style={{ fill: "#000000", fontSize: 36 }}
+            style={{ fill: "#ffffff", fontSize: 36, fontWeight: "bold" }}
           />
         </pixiContainer>
       ))}
@@ -179,54 +187,12 @@ const PixiContainer = ({
         ref={lineRef}
         draw={(graphics) => {
           graphics.clear();
-          graphics.setFillStyle({ color: "red" });
-          graphics.stroke();
-          graphics.setStrokeStyle({ width: 10, color: "#000000" });
+          graphics.setStrokeStyle({ width: 4, color: "#a78bfa" });
           graphics.moveTo(app.screen.width / 2, 0);
           graphics.lineTo(app.screen.width / 2, app.screen.height);
           graphics.stroke();
-          graphics.fill("#000000");
         }}
       />
     </pixiContainer>
   );
 };
-
-interface num {
-  num: string;
-  x: number;
-  y: number;
-  ref: RefObject<Container | null>;
-  index: number;
-}
-
-// const Choice = ({ num, x, y, ref, index }: num) => {
-//   const { app } = useApplication();
-//   const rectRef = useRef<Graphics>(null);
-
-//   const rectW = 150;
-//   const rectH = 100;
-//   return (
-//     <pixiContainer ref={ref} x={x} y={y}>
-//       <pixiGraphics
-//         x={0}
-//         y={0}
-//         ref={rectRef}
-//         draw={(graphics) => {
-//           graphics.clear();
-//           graphics.setFillStyle({ color: "red" });
-//           graphics.roundRect(0, 0, rectW, rectH);
-//           graphics.fill("#ffff2f");
-//         }}
-//         eventMode="static"
-//       />
-//       <pixiText
-//         x={rectW / 2}
-//         y={rectH / 2}
-//         anchor={0.5}
-//         text={textValueRefArray[index]!.current!}
-//         style={{ fill: "#000000", fontSize: 36 }}
-//       />
-//     </pixiContainer>
-//   );
-// };

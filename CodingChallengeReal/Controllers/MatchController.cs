@@ -22,7 +22,7 @@ namespace CodingChallengeReal.Controllers
     public class MatchController : Controller
     {
         private readonly IMatchService _matchService;
-        private readonly IHubContext<MatchHub> _matchHub;
+        private readonly IHubContext<MatchHubSignalR> _matchHub;
         private readonly EnqueueService _enqueueService;
         private readonly QueueHandler _queueHandler;
         private readonly IMatchRepository _matchRepository;
@@ -33,7 +33,7 @@ namespace CodingChallengeReal.Controllers
 
 
 
-        public MatchController(IMatchRepository matchRepository, IMapper mapper, IProblemSetRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHub> matchHub, IMatchService matchService, QueueHandler matchmaker,
+        public MatchController(IMatchRepository matchRepository, IMapper mapper, IProblemSetRepository questionRepository, EnqueueService enqueueService, IHubContext<MatchHubSignalR> matchHub, IMatchService matchService, QueueHandler matchmaker,
             MatchManager matchManager)
         {
             _matchService = matchService;

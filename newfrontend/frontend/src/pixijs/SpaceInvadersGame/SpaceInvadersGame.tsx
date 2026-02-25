@@ -17,8 +17,17 @@ export default function SpaceInvadersGame({
   answerOrder,
 }: gameWonInterface) {
   return (
-    <div className="w-[800px] h-[400px]">
-      <Application width={800} height={800} backgroundColor={"#ffffff"}>
+    <div
+      className="w-[800px] h-[800px]"
+      style={{
+        borderRadius: "12px",
+        overflow: "hidden",
+        border: "1px solid rgba(102,98,255,0.45)",
+        boxShadow:
+          "0 0 28px rgba(102,98,255,0.3), 0 0 56px rgba(102,98,255,0.12)",
+      }}
+    >
+      <Application width={800} height={800} backgroundColor={"#0d0b1a"}>
         <PixiContainer
           setGameWon={setGameWon}
           gameStatus={gameStatus}
@@ -96,7 +105,7 @@ const PixiContainer = ({
       const container = new Container();
       const sprite = Sprite.from(enemyTexture);
       const chosenLetter = answerOrder[index];
-      const text = new Text({ text: chosenLetter });
+      const text = new Text({ text: chosenLetter, style: { fill: "#ffffff", fontSize: 18, fontWeight: "bold" } });
       container.width = enemyDimensions.width;
       container.height = enemyDimensions.height;
       container.x = (index % (totalEnemies / 2)) * 100 + 50;

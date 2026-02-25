@@ -7,16 +7,22 @@ import DragAndDropGame from "../../pixijs/DragAndDropGame/DragAndDropGame";
 import SpaceInvadersGame from "../../pixijs/SpaceInvadersGame/SpaceInvadersGame";
 import useSignalR from "../../hooks/useSignalR";
 import { useMatchCtx } from "../../store/MatchCtx";
-import { retrieveGameOrder } from "../../pixijs/Utils/stringsutils";
+import {
+  adjustQuestionInformation,
+  // mixAnswerChoiceOrder,
+  retrieveGameOrder,
+} from "../../pixijs/Utils/utils";
 import { GameCountdown } from "../../components/GameCountdown";
 import { MatchResultScreen } from "../../components/MatchResultScreen";
 import { CheckForInMatch } from "../../components/CheckForInMatch";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import type { Question } from "../../pixijs/Utils/interfaces";
+
 export const GamePage = () => {
   // essentially we're gonna call to get the information of the match using the details loaded
   // from local host and the context
-
+  const winLockRef = useRef(false);
   const initialGameState: GameState = {
     loading: true,
     matchInfo: null,
@@ -31,6 +37,7 @@ export const GamePage = () => {
     gameOne: false,
     gameTwo: false,
     gameThree: false,
+    randomAnswerIndex: "",
   };
   const [state, dispatch] = useReducer(gameReducer, initialGameState);
   const authCtx = useAuth();
@@ -53,6 +60,7 @@ export const GamePage = () => {
     gameOne,
     gameTwo,
     gameThree,
+    randomAnswerIndex,
   } = state;
   const { connectionRef } = useSignalR();
   const timeSentRef = useRef(false);
@@ -71,6 +79,7 @@ export const GamePage = () => {
           questionOrder,
           fullAnswerOrder,
           onLoadTime,
+          randomAnswerIndex,
         } = action.payload;
 
         console.log(
@@ -88,12 +97,14 @@ export const GamePage = () => {
           questionOrder,
           fullAnswerOrder,
           currentMinigameNumber: minigameOrder[currentStageNum],
+          randomAnswerIndex: randomAnswerIndex,
           onLoadTime,
         };
 
       case "SET_QUESTION_DATA":
         return {
           ...state,
+
           questionInformation: action.payload.questionInformation,
           currentGameAnswerOrder: action.payload.currentGameAnswerOrder,
         };
@@ -119,10 +130,15 @@ export const GamePage = () => {
           questionInformation: null,
           currentGameAnswerOrder: null,
         };
+
       default:
         return state;
     }
   }
+
+  useEffect(() => {
+    winLockRef.current = false;
+  }, [currentStage]);
 
   // useEffect for player loading back into game on reconnecting
   useEffect(() => {
@@ -148,7 +164,7 @@ export const GamePage = () => {
         const matchData = result.data;
         const currentStage = Number(result.data[`level:${authCtx.UID}`]); // the stage the current player is at
         const minigameOrder: string = result.data!.minigameOrder; // string containing order of minigames to be played eg: "12212"
-
+        const randomAnswerIndex = result.data!.randomAnswerIndex;
         console.log("Payload: ", {
           matchInfo: matchData,
           currentStageNum: currentStage,
@@ -156,6 +172,7 @@ export const GamePage = () => {
           questionOrder: matchData.questionOrder,
           fullAnswerOrder: matchData.fullAnswerOrder,
           onLoadTime,
+          randomAnswerIndex: randomAnswerIndex,
         });
 
         dispatch({
@@ -167,6 +184,7 @@ export const GamePage = () => {
             questionOrder: matchData.questionOrder,
             fullAnswerOrder: matchData.fullAnswerOrder,
             onLoadTime,
+            randomAnswerIndex: randomAnswerIndex,
           },
         });
         // console.log(`Index: ${currentStage}`);
@@ -207,7 +225,13 @@ export const GamePage = () => {
   // this useEffect runs when the initial match information has been loaded
   // and is used for loading in the question data
   useEffect(() => {
-    if (currentStage === -1 || !questionOrder || questionInformation) return;
+    if (
+      currentStage === -1 ||
+      !questionOrder ||
+      questionInformation ||
+      !randomAnswerIndex
+    )
+      return;
 
     let cancelled = false;
     // check for game won condition
@@ -245,10 +269,22 @@ export const GamePage = () => {
         currentMinigameNumber!,
       );
 
+      const currStageRandomIndex = randomAnswerIndex.substring(
+        0 + currentStage * 4,
+        4 + currentStage * 4,
+      );
+
+      console.log("PREV QUESTION INFO: ", result.data);
+      const prevQuestionInfo: Question = result.data;
+      const newQuestionInformation: Question = adjustQuestionInformation(
+        prevQuestionInfo,
+        currStageRandomIndex,
+      );
+
       dispatch({
         type: "SET_QUESTION_DATA",
         payload: {
-          questionInformation: result.data,
+          questionInformation: newQuestionInformation,
           currentGameAnswerOrder,
         },
       });
@@ -287,6 +323,8 @@ export const GamePage = () => {
   const gameWinFunction = async (gameNumber: 1 | 2 | 3) => {
     // says that round is won
     if (countdown) return; // no double-advance
+    if (winLockRef.current) return;
+    winLockRef.current = true;
 
     dispatch({
       type: "SET_GAME_WIN_STATUS",
@@ -339,6 +377,9 @@ export const GamePage = () => {
           }),
         1000,
       );
+    setTimeout(() => {
+      winLockRef.current = false;
+    }, 1500);
 
     // locally update state
     // updating the current minigame for the player, based on their new level
@@ -382,9 +423,41 @@ export const GamePage = () => {
     console.log("QUESTION INFORMATION: ", questionInformation);
 
     return (
-      <div className="relative h-full w-full flex items-center justify-center">
+      <div
+        className="relative h-full w-full flex items-center justify-center"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 50%, #1a1535 0%, #110e1e 55%, #0d0d0d 100%)",
+        }}
+      >
         <CheckForInMatch />
-        <div>Loading...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              border: "3px solid transparent",
+              borderTopColor: "#6662FF",
+              borderRightColor: "rgba(102,98,255,0.35)",
+              animation: "spin 1s linear infinite",
+              boxShadow: "0 0 16px rgba(102,98,255,0.5)",
+            }}
+          />
+          <p
+            style={{
+              color: "#a78bfa",
+              fontSize: "12px",
+              letterSpacing: "4px",
+              textTransform: "uppercase",
+              fontWeight: 600,
+              margin: 0,
+            }}
+          >
+            Loading Match...
+          </p>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -396,19 +469,115 @@ export const GamePage = () => {
     return <GameCountdown onComplete={onComplete} />;
   }
 
+  const answerLabels = ["A", "B", "C", "D"];
+
+  const GameLayout = ({ children }: { children: React.ReactNode }) => (
+    <div
+      className="h-full w-full flex flex-col"
+      style={{
+        background:
+          "radial-gradient(ellipse at 50% 50%, #1a1535 0%, #110e1e 55%, #0d0d0d 100%)",
+      }}
+    >
+      {/* Header bar */}
+      <div
+        className="w-full flex items-center justify-between px-4 sm:px-8 py-3 shrink-0"
+        style={{ borderBottom: "1px solid rgba(102,98,255,0.2)" }}
+      >
+        <div
+          style={{
+            background: "rgba(102,98,255,0.15)",
+            border: "1px solid rgba(102,98,255,0.4)",
+            borderRadius: "8px",
+            padding: "5px 14px",
+            color: "#a78bfa",
+            fontSize: "11px",
+            letterSpacing: "3px",
+            fontWeight: 700,
+            textTransform: "uppercase",
+          }}
+        >
+          Round {currentStage + 1} / 5
+        </div>
+
+        {/* Stage progress dots */}
+        <div className="flex items-center gap-2">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div
+              key={i}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background:
+                  i < currentStage
+                    ? "#6662FF"
+                    : i === currentStage
+                      ? "#a78bfa"
+                      : "rgba(102,98,255,0.2)",
+                boxShadow:
+                  i <= currentStage ? "0 0 6px rgba(102,98,255,0.7)" : "none",
+                transition: "all 0.3s ease",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Question panel */}
+      <div
+        className="w-full px-4 sm:px-8 py-4 shrink-0"
+        style={{
+          background: "rgba(102,98,255,0.05)",
+          borderBottom: "1px solid rgba(102,98,255,0.12)",
+        }}
+      >
+        <p
+          style={{
+            color: "#e2e8f0",
+            fontSize: "clamp(0.95rem, 2vw, 1.2rem)",
+            fontWeight: 500,
+            lineHeight: 1.55,
+            margin: "0 0 12px 0",
+            textAlign: "center",
+          }}
+        >
+          {questionInformation?.questionText}
+        </p>
+
+        {/* Answer choices as reference chips */}
+        <div className="flex flex-wrap justify-center gap-2">
+          {questionInformation?.answerChoices.map((choice, i) => (
+            <span
+              key={i}
+              style={{
+                background: "rgba(102,98,255,0.1)",
+                border: "1px solid rgba(102,98,255,0.25)",
+                borderRadius: "6px",
+                padding: "4px 12px",
+                color: "#c4b5fd",
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                letterSpacing: "0.5px",
+              }}
+            >
+              {answerLabels[i] ?? i} — {choice}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Game canvas area */}
+      <div className="flex-1 flex items-center justify-center overflow-auto p-2">
+        {children}
+      </div>
+    </div>
+  );
+
   // check for winner
   if (currentMinigameNumber === "0") {
-    // console.log("In Dino Game");
     return (
-      <div style={{ color: "white" }}>
-        <div>ROUND {currentStage} </div>
-        <p>{questionInformation?.questionText}</p>
-        {questionInformation?.answerChoices.map((answerChoice, index) => (
-          <p key={index}>
-            {index}:{answerChoice}
-          </p>
-        ))}
-
+      <GameLayout>
         <DinosaurGame
           key={currentStage}
           setGameWon={() => gameWinFunction(1)}
@@ -416,19 +585,11 @@ export const GamePage = () => {
           gameInformation={questionInformation!}
           answerOrder={currentGameAnswerOrder!}
         />
-      </div>
+      </GameLayout>
     );
   } else if (currentMinigameNumber === "1") {
-    // console.log("In Drag/Drop Game");
     return (
-      <div style={{ color: "white" }}>
-        <div>ROUND {currentStage} </div>
-        <p>{questionInformation?.questionText}</p>
-        {questionInformation?.answerChoices.map((answerChoice, index) => (
-          <p key={index}>
-            {index}:{answerChoice}
-          </p>
-        ))}
+      <GameLayout>
         <DragAndDropGame
           key={currentStage}
           setGameWon={() => gameWinFunction(2)}
@@ -436,19 +597,11 @@ export const GamePage = () => {
           gameInformation={questionInformation!}
           answerOrder={currentGameAnswerOrder!}
         />
-      </div>
+      </GameLayout>
     );
   } else {
-    // console.log("In Space Invaders Game");
     return (
-      <div style={{ color: "white" }}>
-        <div>ROUND {currentStage} </div>
-        <p>{questionInformation?.questionText}</p>
-        {questionInformation?.answerChoices.map((answerChoice, index) => (
-          <p key={index}>
-            {index}:{answerChoice}
-          </p>
-        ))}
+      <GameLayout>
         <SpaceInvadersGame
           key={currentStage}
           setGameWon={() => gameWinFunction(3)}
@@ -456,8 +609,7 @@ export const GamePage = () => {
           gameInformation={questionInformation!}
           answerOrder={currentGameAnswerOrder!}
         />
-      </div>
+      </GameLayout>
     );
   }
-  return <div>Game</div>;
 };

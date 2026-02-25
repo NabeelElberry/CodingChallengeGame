@@ -15,11 +15,12 @@
         local questionOrder = ARGV[4]
         local problemSetId = ARGV[5]
         local gameAnswerOrder = ARGV[6]
+        local randomAnswerIndex = ARGV[7]
 
         -- logic is simple, just make a list with matchKey as the list name, and two values inside it 
         -- structure looks like this: List: {matchKey} Values: {playerOneId-
 
-        redis.call('HSET', matchKey, 'level:' ..  playerOneId, 0, 'level:' .. playerTwoId, 0, 'minigameOrder', minigameOrder, 'time:' .. playerOneId, 0, 'time:' .. playerTwoId, 0, 'questionOrder', questionOrder, 'problemSetId', problemSetId, 'fullAnswerOrder', gameAnswerOrder)
+        redis.call('HSET', matchKey, 'level:' ..  playerOneId, 0, 'level:' .. playerTwoId, 0, 'minigameOrder', minigameOrder, 'time:' .. playerOneId, 0, 'time:' .. playerTwoId, 0, 'questionOrder', questionOrder, 'problemSetId', problemSetId, 'fullAnswerOrder', gameAnswerOrder, 'randomAnswerIndex', randomAnswerIndex)
         return true;
 
 ";
@@ -48,9 +49,11 @@
         local newValue  = ARGV[2]
 
         -- logic is simple, edits the field to be whatever new value
-
-        redis.call('HSET', matchKey, 'time:' ..  playerId, newValue)
-        return true;
+        if redis.call('SISMEMBER', 'all_matched', playerId) == 1 then
+            redis.call('HSET', matchKey, 'time:' ..  playerId, newValue)
+            return true
+        end
+        return false;
 ";
 
 

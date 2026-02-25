@@ -145,7 +145,7 @@ app.MapGet("/ws", async (HttpContext context, ChatService chatService) =>
         await context.Response.WriteAsync("Expected a WebSocket request");
     }
 });
-app.MapHub<MatchHub>("/matchhub").RequireCors(corsPolicy);
+app.MapHub<MatchHubSignalR>("/matchhub").RequireCors(corsPolicy);
 
 
 // Configure the HTTP request pipeline.

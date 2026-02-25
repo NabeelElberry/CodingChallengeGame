@@ -23,7 +23,30 @@ namespace CodingChallengeReal.Services
             _problemSetRepository = problemSetRepository;
         }
 
-       
+        
+
+        private string GenerateRandomizedAnswerOrder(int amountOfQuestions)
+        {
+            int run = 0;
+            string finalString = "";
+            while (run < amountOfQuestions)
+            {
+                List<int> intList = new List<int>() { 0,1,2,3 };
+                
+                Random random = Random.Shared;
+                int totalNumInArr = 3;
+                for (int i = totalNumInArr; i >= 0; i--)
+                {
+                    totalNumInArr--;
+                    int randomIndex = random.Next(0, i + 1);
+                    finalString += intList[randomIndex];
+                    intList.RemoveAt(randomIndex);
+                }
+                run++;
+            }
+
+            return finalString;
+        } 
 
         /// <summary>
         /// Run this when a game is created, makes a redis hash which sets both players level to 0. 
@@ -105,7 +128,7 @@ namespace CodingChallengeReal.Services
    
             for (int i = 0; i < minigameOrderArray.Length; i++)
             {
-                amountOfRounds = 0;
+                int amountOfAnswers = 0;
                 //Console.WriteLine($"{i}th run");
                 int currentMiniGame = minigameOrderArray[i];
              
@@ -114,9 +137,9 @@ namespace CodingChallengeReal.Services
                 if (currentMiniGame == 0 || currentMiniGame == 1) // dino game, drag and drop, generate about 200 
                 {
                     // generates 200 letters for minigame 1 or 2
-                    amountOfRounds = 200;
+                    amountOfAnswers = 200;
                     //Console.WriteLine("Minigame 0 or 1 chosen");
-                    while (x < amountOfRounds)
+                    while (x < amountOfAnswers)
                     {
                         answerOrder += getRandomLetter();
                         x++;
@@ -124,8 +147,8 @@ namespace CodingChallengeReal.Services
 
                 } else if (currentMiniGame == 2) // space invaders
                 {
-    
-                    amountOfRounds = 12;
+
+                    amountOfAnswers = 12;
            
                     // this system ensures at least 2 of each answer choices, and then 4 more random ones
                     var choicesLeft = new List<(char c, int num)>
@@ -144,7 +167,7 @@ namespace CodingChallengeReal.Services
                         choicesLeft[number] = (choicesLeft[number].c, choicesLeft[number].num + 1);
                     }
 
-                    for (int z = 0; z < amountOfRounds; z++)
+                    for (int z = 0; z < amountOfAnswers; z++)
                     {
                         int number = random.Next(0, choicesLeft.Count); // picks between 0-3 (A,B,C,D)
                         var tuple = choicesLeft[number]; // picks a random letter
@@ -200,7 +223,7 @@ namespace CodingChallengeReal.Services
                     new RedisKey[] { matchId }, // key
                     new RedisValue[]
                     {
-                        playerOneId, playerTwoId, minigameOrderString, questions, problemSetId.ToString(), JsonConvert.SerializeObject(convertedDict).ToString()
+                        playerOneId, playerTwoId, minigameOrderString, questions, problemSetId.ToString(), JsonConvert.SerializeObject(convertedDict).ToString(), GenerateRandomizedAnswerOrder(amountOfRounds)
                     }
 
                 );
